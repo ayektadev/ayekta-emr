@@ -1,0 +1,318 @@
+/* Legacy styles from original HTML - DO NOT MODIFY */
+/* These styles are preserved exactly as-is to maintain visual parity */
+
+:root {
+  --border: #bdbdbd;
+  --muted: #666;
+  --tab: #f3f3f3;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.subtle {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 8px;
+  align-items: start;
+  margin: 8px 0;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  background: #fafafa;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+button {
+  padding: 10px 12px;
+  border: 1px solid #333;
+  background: white;
+  cursor: pointer;
+}
+
+.pill {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 12px;
+  display: inline-block;
+  margin: 4px 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: 12px;
+  overflow-x: auto;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 48px;
+  background: white;
+}
+
+.tab {
+  white-space: nowrap;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  background: var(--tab);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tab.active {
+  background: white;
+  border-bottom: 1px solid white;
+  font-weight: 600;
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.med,
+.card {
+  border: 1px dashed var(--border);
+  padding: 8px;
+  margin: 8px 0;
+  background: #f9f9f9;
+}
+
+.ac-panel {
+  display: none;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-top: none;
+  background: #fbfbfb;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+  margin-top: 16px;
+}
+
+#output {
+  white-space: pre;
+  border: 1px solid var(--border);
+  padding: 10px;
+  margin-top: 10px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid var(--border);
+  padding: 6px;
+  text-align: left;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+/* Form grid - responsive */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.form-grid label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 0.6rem 1rem;
+  margin: 0.2rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+#savePatientBtn {
+  background-color: #ef4826;
+  color: white;
+  font-weight: bold;
+  border: 2px solid black;
+}
+
+/* Navigation arrows */
+.nav-arrow {
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.nav-arrow.disabled {
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Accordion styling */
+.accordion {
+  background-color: #f9f9f9;
+  color: #333;
+  cursor: pointer;
+  padding: 0.6rem;
+  width: 100%;
+  border: 1px solid #ccc;
+  text-align: left;
+  outline: none;
+  font-size: 1rem;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.accordion.active,
+.accordion:hover {
+  background-color: #e0e0e0;
+}
+
+.accordion + div {
+  padding: 0 0.6rem;
+  display: none;
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  margin-bottom: 5px;
+}
+
+/* Sticky header */
+#header-block {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Orange focus states */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #ef4826 !important;
+  box-shadow: 0 0 2px #ef4826;
+}
+
+/* Mobile responsive */
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .row label {
+    margin-bottom: 4px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .tabs {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Print styles - Consent only */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #panel-consent,
+  #panel-consent * {
+    visibility: visible;
+  }
+
+  #panel-consent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
