@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/ayekta-emr/sw.js', { scope: '/ayekta-emr/' })})}
