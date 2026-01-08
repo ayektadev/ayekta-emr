@@ -71,7 +71,7 @@ function Header() {
         {/* Logo - clickable to logout */}
         <div className="flex items-center gap-4 cursor-pointer" onClick={handleLogoClick}>
           <img
-            src="/logo-192.png"
+            src={`${import.meta.env.BASE_URL}logo-192.png`}
             alt="Ayekta Logo"
             className="w-10 h-10"
           />

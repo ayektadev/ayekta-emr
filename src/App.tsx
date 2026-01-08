@@ -39,7 +39,7 @@ function App() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-pulse mb-4">
-            <img src="/logo-192.png" alt="Loading" className="w-16 h-16 mx-auto" />
+            <img src={'${import.meta.env.BASE_URL}/logo-192.png'} alt="Loading" className="w-16 h-16 mx-auto" />
           </div>
           <p className="text-ayekta-muted">Loading...</p>
         </div>
