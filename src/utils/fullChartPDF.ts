@@ -175,7 +175,7 @@ export function generateFullChartPDF(data: PatientData): void {
   // PRE-ANESTHESIA
   addSectionHeader('PRE-ANESTHESIA EVALUATION');
   addField('ASA Class', data.preAnesthesia.asaClass);
-  addField('Mallampati', data.preAnesthesia.mallampati);
+  addField('Mallampati', data.preAnesthesia.mallampatiClass);
   addField('Anesthesia Plan', data.preAnesthesia.anesthesiaPlan);
   addField('Risk Level', data.preAnesthesia.riskLevel);
 
@@ -212,10 +212,10 @@ export function generateFullChartPDF(data: PatientData): void {
   // OR RECORD
   addSectionHeader('OR RECORD');
   addField('OR Entry Time', data.orRecord.orEntryTime);
-  addField('Anesthesia Start', data.orRecord.anesthesiaStart);
-  addField('Procedure Start', data.orRecord.procedureStart);
-  addField('Procedure End', data.orRecord.procedureEnd);
-  addField('Anesthesia End', data.orRecord.anesthesiaEnd);
+  addField('Anesthesia Start', data.orRecord.anesthesiaStartTime);
+  addField('Procedure Start', data.orRecord.procedureStartTime);
+  addField('Procedure End', data.orRecord.procedureEndTime);
+  addField('Anesthesia End', data.orRecord.anesthesiaEndTime);
   addField('OR Exit Time', data.orRecord.orExitTime);
 
   // NURSING ORDERS
@@ -223,7 +223,7 @@ export function generateFullChartPDF(data: PatientData): void {
   addField('Admit Diagnosis', data.nursingOrders.admitDiagnosis);
   addField('Vitals Frequency', data.nursingOrders.vitalsFrequency);
   addField('Activity Orders', data.nursingOrders.activityOrders);
-  addField('Diet Orders', data.nursingOrders.dietOrders);
+  addField('Diet', data.nursingOrders.diet);
   addField('IV Fluids', data.nursingOrders.ivFluids);
 
   // PROGRESS NOTES
@@ -266,8 +266,12 @@ export function generateFullChartPDF(data: PatientData): void {
 
   addField('Follow-up Date', data.discharge.followupDate);
   addField('Follow-up Provider', data.discharge.followupProvider);
-  addField('MD Verification', data.discharge.mdVerificationName);
-  addField('RN Verification', data.discharge.rnVerificationName);
+  if (data.discharge.mdVerificationName) {
+    addField('MD Verification', data.discharge.mdVerificationName);
+  }
+  if (data.discharge.rnVerificationName) {
+    addField('RN Verification', data.discharge.rnVerificationName);
+  }
 
   // Footer on each page
   const totalPages = doc.internal.pages.length - 1;

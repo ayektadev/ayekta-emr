@@ -798,6 +798,10 @@ export interface AppState extends PatientData {
   removeDischargeMedication: (id: string) => void;
   updateDischargeMedication: (id: string, data: Partial<Medication>) => void;
 
+  addMedicationDispense: (med: Medication) => void;
+  removeMedicationDispense: (id: string) => void;
+  updateMedicationDispense: (id: string, data: Partial<Medication>) => void;
+
   // New module update actions
   updatePreAnesthesia: (data: Partial<PreAnesthesia>) => void;
   updateAnesthesiaRecord: (data: Partial<AnesthesiaRecord>) => void;

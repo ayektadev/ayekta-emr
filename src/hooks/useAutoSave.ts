@@ -21,6 +21,13 @@ export function useAutoSave() {
     imaging: state.imaging,
     operativeNote: state.operativeNote,
     discharge: state.discharge,
+    preAnesthesia: state.preAnesthesia,
+    anesthesiaRecord: state.anesthesiaRecord,
+    orRecord: state.orRecord,
+    nursingOrders: state.nursingOrders,
+    pacu: state.pacu,
+    floorFlow: state.floorFlow,
+    progressNotes: state.progressNotes,
   }));
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();

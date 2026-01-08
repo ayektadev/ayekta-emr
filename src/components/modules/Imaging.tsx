@@ -59,16 +59,6 @@ function ImagingRow({
 
     const newAttachments: ImageAttachment[] = [];
 
-    // Supported medical imaging formats
-    const supportedFormats = [
-      'image/', // All image types (jpg, png, gif, bmp, tiff, etc.)
-      'application/pdf',
-      'application/dicom', // DICOM files
-      'application/x-dicom',
-      '.dcm', // DICOM extension
-      '.dicom',
-    ];
-
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 

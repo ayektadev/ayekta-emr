@@ -70,8 +70,8 @@ export function generateDischargeSummaryPDF(data: DischargeSummaryData): void {
   yPosition += 5;
 
   // Procedure Performed
-  if (data.surgicalNeeds.selectedProcedures && data.surgicalNeeds.selectedProcedures.length > 0) {
-    addSection('PROCEDURE PERFORMED', data.surgicalNeeds.selectedProcedures.join(', '));
+  if (data.surgicalNeeds.procedure) {
+    addSection('PROCEDURE PERFORMED', data.surgicalNeeds.procedure);
   }
 
   // Discharge Date/Time

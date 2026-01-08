@@ -23,6 +23,13 @@ export default function Discharge() {
   const handleCriteriaChange = (criteriaField: keyof NonNullable<typeof discharge.dischargeCriteria>, value: boolean) => {
     updateDischarge({
       dischargeCriteria: {
+        voiding: false,
+        ambulating: false,
+        dietTolerated: false,
+        painControlled: false,
+        instructionsGiven: false,
+        followUpBooked: false,
+        woundClean: false,
         ...discharge.dischargeCriteria,
         [criteriaField]: value,
       },
