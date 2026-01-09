@@ -812,7 +812,7 @@ export interface AppState extends PatientData {
   updateProgressNotes: (data: Partial<ProgressNotesModule>) => void;
 
   // Data management
-  savePatient: () => void;
+  savePatient: () => { jsonSuccess: boolean };
   loadPatient: (data: PatientData) => void;
   login: (provider: string) => void;
   logout: () => void;

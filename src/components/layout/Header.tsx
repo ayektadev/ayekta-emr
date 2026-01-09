@@ -45,16 +45,27 @@ function Header() {
   };
 
   const handleSave = () => {
-    // Save JSON
-    savePatient();
+    // Save JSON and get result
+    const { jsonSuccess } = savePatient();
 
     // Generate comprehensive PDF
+    let pdfSuccess = false;
     try {
       generateFullChartPDF(patientData);
-      alert('Patient data saved! JSON and PDF files downloaded.');
+      pdfSuccess = true;
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Patient JSON saved, but there was an error generating the PDF.');
+    }
+
+    // Show appropriate message based on results
+    if (jsonSuccess && pdfSuccess) {
+      alert('✅ Patient data saved successfully!\n\nFiles downloaded:\n• GH26' + patientData.ishiId + '.json\n• GH26' + patientData.ishiId + '_Chart.pdf');
+    } else if (jsonSuccess && !pdfSuccess) {
+      alert('⚠️ JSON file downloaded successfully, but PDF generation failed.\n\nCheck the console for error details.');
+    } else if (!jsonSuccess && pdfSuccess) {
+      alert('⚠️ PDF file downloaded successfully, but JSON export failed.\n\nCheck the console for error details.');
+    } else {
+      alert('❌ Failed to save patient data.\n\nBoth JSON and PDF exports failed. Check the console for error details.');
     }
   };
 

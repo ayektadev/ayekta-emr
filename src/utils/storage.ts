@@ -50,23 +50,32 @@ export async function clearStorage(): Promise<void> {
 /**
  * Export patient data as JSON file
  * Filename format: GH26{ishiId}.json
+ * Returns true if successful, false if failed
  */
-export function exportPatientToJSON(data: PatientData): void {
-  const filename = `GH26${data.ishiId}.json`;
+export function exportPatientToJSON(data: PatientData): boolean {
+  try {
+    const filename = `GH26${data.ishiId}.json`;
 
-  const blob = new Blob(
-    [JSON.stringify(data, null, 2)],
-    { type: 'application/json' }
-  );
+    const blob = new Blob(
+      [JSON.stringify(data, null, 2)],
+      { type: 'application/json' }
+    );
 
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log(`JSON file exported successfully: ${filename}`);
+    return true;
+  } catch (error) {
+    console.error('Failed to export JSON file:', error);
+    return false;
+  }
 }
 
 /**

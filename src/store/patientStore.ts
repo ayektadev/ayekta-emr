@@ -756,11 +756,11 @@ export const usePatientStore = create<AppState>((set, get) => ({
       progressNotes: state.progressNotes,
     };
 
-    // Export as JSON file
-    exportPatientToJSON(patientData);
+    // Export as JSON file and save to IndexedDB
+    const jsonSuccess = exportPatientToJSON(patientData);
+    saveToStorage(patientData); // This is async but we don't wait
 
-    // Also save to IndexedDB
-    saveToStorage(patientData);
+    return { jsonSuccess };
   },
 
   loadPatient: (data: PatientData) => {

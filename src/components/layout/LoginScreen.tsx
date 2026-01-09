@@ -68,7 +68,7 @@ function LoginScreen() {
       {/* Logo */}
       <div className="mb-8 cursor-pointer" onClick={handleLogoClick}>
         <img
-          src={`${import.meta.env.BASE_URL}logo-512.png'}
+          src={`${import.meta.env.BASE_URL}logo-512.png`}
           alt="Ayekta Logo"
           className="w-32 h-32 mx-auto mb-4"
         />
