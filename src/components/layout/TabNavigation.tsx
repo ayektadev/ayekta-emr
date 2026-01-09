@@ -31,7 +31,7 @@ export default function TabNavigation() {
   const setCurrentTab = usePatientStore((state) => state.setCurrentTab);
 
   return (
-    <div className="border-b border-ayekta-border sticky top-[60px] z-[999]" style={{ backgroundColor: '#FAF7F0' }}>
+    <div className="border-b border-ayekta-border sticky top-[73px] z-[999]" style={{ backgroundColor: '#FAF7F0' }}>
       <div className="max-w-7xl mx-auto">
         <nav className="flex overflow-x-auto">
           {tabs.map((tab) => (

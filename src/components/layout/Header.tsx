@@ -78,17 +78,17 @@ function Header() {
 
   return (
     <div id="header-block" className="sticky top-0 z-[1000] shadow-md" style={{ backgroundColor: '#FAF7F0' }}>
-      <div className="flex items-center justify-between p-3 border-b border-ayekta-border">
+      <div className="flex items-center justify-between py-2 px-3 border-b border-ayekta-border">
         {/* Logo - clickable to logout */}
         <div className="flex items-center gap-4 cursor-pointer" onClick={handleLogoClick}>
           <img
             src={`${import.meta.env.BASE_URL}logo-192.png`}
             alt="Ayekta Logo"
-            className="w-10 h-10"
+            className="h-14"
           />
           <div>
-            <h1 className="text-lg font-bold">Ayekta</h1>
-            <p className="text-xs text-ayekta-muted">Provider: {currentProvider}</p>
+            <p className="text-xs text-ayekta-muted">Current Provider:</p>
+            <p className="text-sm font-medium">{currentProvider}</p>
           </div>
         </div>
 
