@@ -1,5 +1,6 @@
 import { usePatientStore } from '../../store/patientStore';
 import { getCurrentDate, getCurrentTime } from '../../utils/calculations';
+import { SignatureField } from '../shared/SignatureField';
 
 export default function Triage() {
   const triage = usePatientStore((state) => state.triage);
@@ -81,35 +82,14 @@ export default function Triage() {
         {/* H&P Sign‑off */}
         <section>
           <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">History & Physical Sign‑off</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Provider Name</label>
-              <input
-                type="text"
-                value={triage.hpProviderName}
-                onChange={(e) => handleChange('hpProviderName', e.target.value)}
-                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
-                placeholder="Physician or provider name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Signature Date</label>
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  value={triage.hpProviderSignatureDate}
-                  onChange={(e) => handleChange('hpProviderSignatureDate', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
-                />
-                <button
-                  onClick={() => handleChange('hpProviderSignatureDate', getCurrentDate())}
-                  className="px-3 py-2 bg-ayekta-orange text-white rounded hover:bg-opacity-90 text-sm whitespace-nowrap"
-                >
-                  Today
-                </button>
-              </div>
-            </div>
-          </div>
+          <SignatureField
+            label="Provider Signature"
+            providerName={triage.hpProviderName}
+            signatureDate={triage.hpProviderSignatureDate}
+            onProviderNameChange={(value) => handleChange('hpProviderName', value)}
+            onSignatureDateChange={(value) => handleChange('hpProviderSignatureDate', value)}
+            showAutoFillButton={true}
+          />
         </section>
 
         {/* Vital Signs */}

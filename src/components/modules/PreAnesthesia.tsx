@@ -1,4 +1,5 @@
 import { usePatientStore } from '../../store/patientStore';
+import { SignatureField } from '../shared/SignatureField';
 
 /**
  * Component for capturing the pre‑anesthesia evaluation. This mirrors the paper
@@ -8,28 +9,40 @@ import { usePatientStore } from '../../store/patientStore';
 export default function PreAnesthesia() {
   const preAnesthesia = usePatientStore((state) => state.preAnesthesia);
   const updatePreAnesthesia = usePatientStore((state) => state.updatePreAnesthesia);
+  const demographics = usePatientStore((state) => state.demographics);
+  const surgicalNeeds = usePatientStore((state) => state.surgicalNeeds);
+  const triage = usePatientStore((state) => state.triage);
+  const updateTriage = usePatientStore((state) => state.updateTriage);
 
   // Generic change handler that supports string and boolean values. The type
   // annotation uses `any` for the value to permit both strings and booleans.
   const handleChange = (field: keyof typeof preAnesthesia, value: any) => {
     updatePreAnesthesia({ [field]: value } as any);
+
+    // Bidirectional sync: Update Triage HPI when PreAnesthesia HPI changes
+    if (field === 'historyPresentIllness') {
+      updateTriage({ historyOfPresentIllness: value });
+    }
   };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Pre‑Anesthesia Evaluation</h2>
+      <h2 className="text-2xl font-bold mb-6">Anesthesia Evaluation</h2>
       <div className="space-y-6">
         {/* Procedure and Diagnosis */}
         <section className="bg-white rounded-lg shadow-sm border border-ayekta-border p-6">
           <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">Procedure &amp; Diagnosis</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Proposed Procedure</label>
+              <label className="block text-sm font-medium mb-1">
+                Proposed Procedure <span className="text-xs text-gray-500">(from Surgical Planning)</span>
+              </label>
               <input
                 type="text"
-                value={preAnesthesia.procedure}
+                value={surgicalNeeds.procedure || preAnesthesia.procedure}
                 onChange={(e) => handleChange('procedure', e.target.value)}
-                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 text-gray-700"
+                placeholder="Procedure will auto-fill from Surgical Planning"
               />
             </div>
             <div>
@@ -49,30 +62,39 @@ export default function PreAnesthesia() {
           <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">Medical &amp; Anesthesia History</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">History of Present Illness</label>
+              <label className="block text-sm font-medium mb-1">
+                History of Present Illness <span className="text-xs text-gray-500">(synced with Triage)</span>
+              </label>
               <textarea
-                value={preAnesthesia.historyPresentIllness}
+                value={triage.historyOfPresentIllness || preAnesthesia.historyPresentIllness}
                 onChange={(e) => handleChange('historyPresentIllness', e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="Auto-fills from Triage, editable here and syncs back"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Past Medical History</label>
+              <label className="block text-sm font-medium mb-1">
+                Past Medical History <span className="text-xs text-gray-500">(from Patient Information)</span>
+              </label>
               <textarea
-                value={preAnesthesia.pastMedicalHistory}
-                onChange={(e) => handleChange('pastMedicalHistory', e.target.value)}
+                value={demographics.pastMedicalHistory}
+                readOnly
                 rows={3}
-                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 text-gray-700"
+                placeholder="No past medical history recorded in Patient Information"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Past Surgical History</label>
+              <label className="block text-sm font-medium mb-1">
+                Past Surgical History <span className="text-xs text-gray-500">(from Patient Information)</span>
+              </label>
               <textarea
-                value={preAnesthesia.pastSurgicalHistory}
-                onChange={(e) => handleChange('pastSurgicalHistory', e.target.value)}
+                value={demographics.pastSurgicalHistory}
+                readOnly
                 rows={3}
-                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 text-gray-700"
+                placeholder="No past surgical history recorded in Patient Information"
               />
             </div>
             {/* Systemic Diseases */}
@@ -171,12 +193,15 @@ export default function PreAnesthesia() {
               <label htmlFor="airwayDentitionIssues" className="text-sm">Airway / Dentition issues (loose teeth, limited opening)</label>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Medications &amp; Allergies</label>
+              <label className="block text-sm font-medium mb-1">
+                Allergies <span className="text-xs text-gray-500">(from Patient Information)</span>
+              </label>
               <textarea
-                value={preAnesthesia.medicationsAllergies}
-                onChange={(e) => handleChange('medicationsAllergies', e.target.value)}
+                value={demographics.allergies}
+                readOnly
                 rows={3}
-                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 text-gray-700"
+                placeholder="No allergies recorded in Patient Information"
               />
             </div>
             <div>
@@ -194,16 +219,87 @@ export default function PreAnesthesia() {
         {/* Assessment */}
         <section className="bg-white rounded-lg shadow-sm border border-ayekta-border p-6">
           <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">Physical Assessment</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Vitals</label>
-              <textarea
-                value={preAnesthesia.vitals}
-                onChange={(e) => handleChange('vitals', e.target.value)}
-                rows={2}
-                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
-              />
+
+          {/* Structured Vital Signs */}
+          <div className="mb-6">
+            <h4 className="text-md font-semibold mb-3 text-gray-700">Vital Signs</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-xs font-medium mb-1">HR (bpm)</label>
+                <input
+                  type="text"
+                  value={preAnesthesia.vitalHR}
+                  onChange={(e) => handleChange('vitalHR', e.target.value)}
+                  className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
+                  placeholder="70"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">BP (mmHg)</label>
+                <input
+                  type="text"
+                  value={preAnesthesia.vitalBP}
+                  onChange={(e) => handleChange('vitalBP', e.target.value)}
+                  className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
+                  placeholder="120/80"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">RR (breaths/min)</label>
+                <input
+                  type="text"
+                  value={preAnesthesia.vitalRR}
+                  onChange={(e) => handleChange('vitalRR', e.target.value)}
+                  className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
+                  placeholder="16"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">O2 Sat (%)</label>
+                <input
+                  type="text"
+                  value={preAnesthesia.vitalO2Sat}
+                  onChange={(e) => handleChange('vitalO2Sat', e.target.value)}
+                  className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
+                  placeholder="98"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">Temp (°F)</label>
+                <input
+                  type="text"
+                  value={preAnesthesia.vitalTemp}
+                  onChange={(e) => handleChange('vitalTemp', e.target.value)}
+                  className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
+                  placeholder="98.6"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">Height (cm)</label>
+                <input
+                  type="text"
+                  value={preAnesthesia.vitalHeight}
+                  onChange={(e) => handleChange('vitalHeight', e.target.value)}
+                  className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
+                  placeholder="170"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">Weight (kg)</label>
+                <input
+                  type="text"
+                  value={preAnesthesia.vitalWeight}
+                  onChange={(e) => handleChange('vitalWeight', e.target.value)}
+                  className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
+                  placeholder="70"
+                />
+              </div>
             </div>
+          </div>
+
+          {/* Physical Exam Findings */}
+          <h4 className="text-md font-semibold mb-3 text-gray-700">Physical Examination</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Airway Assessment</label>
               <textarea
@@ -332,27 +428,14 @@ export default function PreAnesthesia() {
         {/* Provider Sign‑Off */}
         <section className="bg-white rounded-lg shadow-sm border border-ayekta-border p-6">
           <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">Provider Sign‑Off</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Provider Name</label>
-              <input
-                type="text"
-                value={preAnesthesia.providerName}
-                onChange={(e) => handleChange('providerName', e.target.value)}
-                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
-                placeholder="Name of anesthesiologist"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Signature Date</label>
-              <input
-                type="date"
-                value={preAnesthesia.providerSignatureDate}
-                onChange={(e) => handleChange('providerSignatureDate', e.target.value)}
-                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
-              />
-            </div>
-          </div>
+          <SignatureField
+            label="Anesthesiologist Signature"
+            providerName={preAnesthesia.providerName}
+            signatureDate={preAnesthesia.providerSignatureDate}
+            onProviderNameChange={(value) => handleChange('providerName', value)}
+            onSignatureDateChange={(value) => handleChange('providerSignatureDate', value)}
+            showAutoFillButton={true}
+          />
         </section>
       </div>
     </div>

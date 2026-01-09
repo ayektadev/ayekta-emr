@@ -4,6 +4,7 @@ import { useRestorePatient } from './hooks/useRestorePatient';
 import LoginScreen from './components/layout/LoginScreen';
 import Header from './components/layout/Header';
 import TabNavigation from './components/layout/TabNavigation';
+import GoogleDriveSync from './components/shared/GoogleDriveSync';
 
 // Module imports
 import Demographics from './components/modules/Demographics';
@@ -22,6 +23,7 @@ import NursingOrders from './components/modules/NursingOrders';
 import PACU from './components/modules/PACU';
 import FloorFlow from './components/modules/FloorFlow';
 import ProgressNotes from './components/modules/ProgressNotes';
+import FollowUpNotes from './components/modules/FollowUpNotes';
 
 function App() {
   const isLoggedIn = usePatientStore((state) => state.isLoggedIn);
@@ -56,6 +58,11 @@ function App() {
       <Header />
       <TabNavigation />
 
+      {/* Google Drive Sync - Fixed position bottom right, compact */}
+      <div className="fixed bottom-4 right-4 z-[1000] w-48">
+        <GoogleDriveSync />
+      </div>
+
       {/* Tab content panels - conditional rendering based on currentTab */}
       <main className="pt-2">
         {currentTab === 'demographics' && <Demographics />}
@@ -74,6 +81,7 @@ function App() {
         {currentTab === 'pacu' && <PACU />}
         {currentTab === 'floor-flow' && <FloorFlow />}
         {currentTab === 'progress-notes' && <ProgressNotes />}
+        {currentTab === 'follow-up-notes' && <FollowUpNotes />}
       </main>
     </div>
   );

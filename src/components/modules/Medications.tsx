@@ -1,14 +1,11 @@
 import { usePatientStore } from '../../store/patientStore';
-import type { Medication, Allergy } from '../../types/patient.types';
+import type { Medication } from '../../types/patient.types';
 
 export default function Medications() {
   const medications = usePatientStore((state) => state.medications);
   const addCurrentMedication = usePatientStore((state) => state.addCurrentMedication);
   const removeCurrentMedication = usePatientStore((state) => state.removeCurrentMedication);
   const updateCurrentMedication = usePatientStore((state) => state.updateCurrentMedication);
-  const addAllergy = usePatientStore((state) => state.addAllergy);
-  const removeAllergy = usePatientStore((state) => state.removeAllergy);
-  const updateAllergy = usePatientStore((state) => state.updateAllergy);
   const addPrnMedication = usePatientStore((state) => state.addPrnMedication);
   const removePrnMedication = usePatientStore((state) => state.removePrnMedication);
   const updatePrnMedication = usePatientStore((state) => state.updatePrnMedication);
@@ -43,34 +40,6 @@ export default function Medications() {
                   medication={med}
                   onUpdate={updateCurrentMedication}
                   onRemove={removeCurrentMedication}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Allergies */}
-        <section className="bg-white rounded-lg shadow-sm border border-ayekta-border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-ayekta-orange">Allergies</h3>
-            <button
-              onClick={() => addAllergy({ id: '', allergen: '', reaction: '', severity: '' })}
-              className="px-4 py-2 bg-ayekta-orange text-white rounded hover:bg-opacity-90 transition-colors text-sm"
-            >
-              + Add Allergy
-            </button>
-          </div>
-
-          {medications.allergies.length === 0 ? (
-            <p className="text-ayekta-muted text-sm">No known allergies</p>
-          ) : (
-            <div className="space-y-4">
-              {medications.allergies.map((allergy) => (
-                <AllergyRow
-                  key={allergy.id}
-                  allergy={allergy}
-                  onUpdate={updateAllergy}
-                  onRemove={removeAllergy}
                 />
               ))}
             </div>
@@ -224,66 +193,6 @@ function MedicationRow({
 
       <button
         onClick={() => onRemove(medication.id)}
-        className="text-red-600 hover:text-red-700 text-sm font-medium"
-      >
-        Remove
-      </button>
-    </div>
-  );
-}
-
-// Allergy Row Component
-function AllergyRow({
-  allergy,
-  onUpdate,
-  onRemove,
-}: {
-  allergy: Allergy;
-  onUpdate: (id: string, updates: Partial<Allergy>) => void;
-  onRemove: (id: string) => void;
-}) {
-  return (
-    <div className="p-4 border border-ayekta-border rounded">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-        <div>
-          <label className="block text-xs font-medium mb-1">Allergen</label>
-          <input
-            type="text"
-            value={allergy.allergen}
-            onChange={(e) => onUpdate(allergy.id, { allergen: e.target.value })}
-            className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
-            placeholder="e.g., Penicillin"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium mb-1">Reaction</label>
-          <input
-            type="text"
-            value={allergy.reaction}
-            onChange={(e) => onUpdate(allergy.id, { reaction: e.target.value })}
-            className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
-            placeholder="e.g., Rash, anaphylaxis"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium mb-1">Severity</label>
-          <select
-            value={allergy.severity}
-            onChange={(e) => onUpdate(allergy.id, { severity: e.target.value })}
-            className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange text-sm"
-          >
-            <option value="">Select...</option>
-            <option value="mild">Mild</option>
-            <option value="moderate">Moderate</option>
-            <option value="severe">Severe</option>
-          </select>
-        </div>
-      </div>
-
-      <button
-        onClick={() => onRemove(allergy.id)}
         className="text-red-600 hover:text-red-700 text-sm font-medium"
       >
         Remove

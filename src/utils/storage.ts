@@ -9,10 +9,12 @@ const patientDB = localforage.createInstance({
 });
 
 /**
- * Save patient data to IndexedDB
+ * Save patient data to IndexedDB only (no Google Drive sync)
+ * Google Drive sync happens manually via "Save Patient" button
  */
 export async function saveToStorage(data: PatientData): Promise<void> {
   try {
+    // Save to IndexedDB for offline access and auto-save
     await patientDB.setItem('current-patient', data);
   } catch (error) {
     console.error('Failed to save to storage:', error);
@@ -58,17 +60,27 @@ export function exportPatientToJSON(data: PatientData): boolean {
 
     const blob = new Blob(
       [JSON.stringify(data, null, 2)],
-      { type: 'application/json' }
+      { type: 'application/json;charset=utf-8' }
     );
 
+    // Safari-compatible download approach
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = filename;
+    a.style.display = 'none';
+
+    // Add to DOM, click, and clean up
     document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
+    // Use setTimeout for Safari compatibility
+    setTimeout(() => {
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }, 0);
 
     console.log(`JSON file exported successfully: ${filename}`);
     return true;
@@ -84,27 +96,27 @@ export function exportPatientToJSON(data: PatientData): boolean {
 export async function importPatientFromJSON(file: File): Promise<PatientData> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
-        
+
         // Basic validation
         if (!data.demographics || !data.ishiId) {
           reject(new Error('Invalid patient data file'));
           return;
         }
-        
+
         resolve(data as PatientData);
       } catch (error) {
         reject(new Error('Invalid JSON file'));
       }
     };
-    
+
     reader.onerror = () => {
       reject(new Error('Failed to read file'));
     };
-    
+
     reader.readAsText(file);
   });
 }

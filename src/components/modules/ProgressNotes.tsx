@@ -14,6 +14,7 @@ import { SignatureField } from '../shared/SignatureField';
 export default function ProgressNotes() {
   const progressNotes = usePatientStore((state) => state.progressNotes);
   const updateProgressNotes = usePatientStore((state) => state.updateProgressNotes);
+  const currentProvider = usePatientStore((state) => state.currentProvider);
 
   // Helper to add a new progress note with default values
   const addNote = () => {
@@ -46,7 +47,7 @@ export default function ProgressNotes() {
       planDischargeHome: false,
       planMedicationChanges: false,
       planOther: '',
-      providerName: '',
+      providerName: currentProvider,
       providerSignatureDate: date,
       // New structured exam fields default to empty strings
       lungsExam: '',

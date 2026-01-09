@@ -326,7 +326,15 @@ export interface PreAnesthesia {
   anesthesiaComplications: string;
   medicationsAllergies: string;
   substanceUse: string;
-  vitals: string;
+  vitals: string; // Legacy free-text field (kept for backwards compatibility)
+  // Structured vital signs for anesthesia evaluation
+  vitalHR: string;
+  vitalBP: string;
+  vitalRR: string;
+  vitalO2Sat: string;
+  vitalTemp: string;
+  vitalHeight: string;
+  vitalWeight: string;
   airwayAssessment: string;
   rangeOfMotion: string;
   cardiovascularExam: string;
@@ -700,12 +708,34 @@ export interface ProgressNotesModule {
   notes: ProgressNote[];
 }
 
+export interface FollowUpNote {
+  id: string;
+  visitDate: string;
+  visitTime: string;
+  chiefComplaint: string;
+  intervalHistory: string;
+  woundCheck: string;
+  painLevel: string;
+  complications: string;
+  examination: string;
+  assessment: string;
+  plan: string;
+  nextFollowUp: string;
+  providerName: string;
+  providerSignatureDate: string;
+}
+
+export interface FollowUpNotesModule {
+  notes: FollowUpNote[];
+}
+
 export interface PatientData {
   // Metadata
   ishiId: string;
   currentProvider: string;
   createdAt: string;
   updatedAt: string;
+  firstSavedAt?: string; // Original save timestamp, preserved across updates
 
   // All modules
   demographics: Demographics;
@@ -732,6 +762,8 @@ export interface PatientData {
   floorFlow: FloorFlow;
   /** Daily progress notes */
   progressNotes: ProgressNotesModule;
+  /** Post-discharge follow-up appointment notes */
+  followUpNotes: FollowUpNotesModule;
 }
 
 export type TabName =
@@ -744,6 +776,7 @@ export type TabName =
   | 'imaging'
   | 'operative-note'
   | 'discharge'
+  | 'follow-up-notes'
   | 'pre-anesthesia'
   | 'anesthesia-record'
   | 'or-record'
@@ -810,6 +843,11 @@ export interface AppState extends PatientData {
   updatePACU: (data: Partial<PACUFlow>) => void;
   updateFloorFlow: (data: Partial<FloorFlow>) => void;
   updateProgressNotes: (data: Partial<ProgressNotesModule>) => void;
+
+  // Follow-up Notes actions
+  addFollowUpNote: (note: FollowUpNote) => void;
+  removeFollowUpNote: (id: string) => void;
+  updateFollowUpNote: (id: string, updates: Partial<FollowUpNote>) => void;
 
   // Data management
   savePatient: () => { jsonSuccess: boolean };

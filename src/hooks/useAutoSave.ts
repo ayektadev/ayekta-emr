@@ -28,6 +28,7 @@ export function useAutoSave() {
     pacu: state.pacu,
     floorFlow: state.floorFlow,
     progressNotes: state.progressNotes,
+    followUpNotes: state.followUpNotes,
   }));
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();

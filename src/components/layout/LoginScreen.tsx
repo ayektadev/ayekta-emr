@@ -64,24 +64,24 @@ function LoginScreen() {
   };
 
   return (
-    <div id="login-screen" className="min-h-screen flex flex-col items-center justify-center p-6">
-      {/* Logo */}
-      <div className="mb-8 cursor-pointer" onClick={handleLogoClick}>
+    <div id="login-screen" className="min-h-screen flex flex-col items-center justify-center p-6" style={{ backgroundColor: '#F4F1E8' }}>
+      {/* Logo - Significantly larger with fade-in animation */}
+      <div className="mb-8 cursor-pointer animate-fade-in-scale" onClick={handleLogoClick}>
         <img
           src={`${import.meta.env.BASE_URL}logo-512.png`}
           alt="Ayekta Logo"
-          className="w-32 h-32 mx-auto mb-4"
+          className="w-64 h-64 mx-auto mb-4"
         />
       </div>
 
-      {/* Title */}
-      <h1 className="text-3xl font-bold mb-2 text-center">Ayekta</h1>
-      <p className="subheader text-lg mb-8 text-center text-ayekta-muted">
+      {/* Title with staggered fade-in */}
+      <h1 className="text-3xl font-bold mb-2 text-center animate-fade-in animate-delay-300">Ayekta</h1>
+      <p className="subheader text-lg mb-8 text-center text-ayekta-muted animate-fade-in animate-delay-500">
         Custom built for ISHI — {APP_VERSION}
       </p>
 
-      {/* Provider Selection */}
-      <div className="w-full max-w-md mb-6">
+      {/* Provider Selection with staggered fade-in */}
+      <div className="w-full max-w-md mb-6 animate-fade-in animate-delay-700">
         <label htmlFor="providerSelect" className="block mb-2 font-semibold">
           Select Provider:
         </label>
@@ -100,8 +100,8 @@ function LoginScreen() {
         </select>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col gap-4 w-full max-w-md">
+      {/* Action Buttons with staggered fade-in */}
+      <div className="flex flex-col gap-4 w-full max-w-md animate-fade-in animate-delay-900">
         <button
           id="loginNewBtn"
           onClick={handleNewPatient}

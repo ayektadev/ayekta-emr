@@ -4,8 +4,11 @@ import type { PatientData } from '../types/patient.types';
 /**
  * Generate a comprehensive PDF of the entire patient chart
  * Filename format: GH26{ishiId}_Chart.pdf
+ * Returns PDF as Blob for upload to Google Drive or local download
+ * NOTE: This function does NOT trigger a download. The caller is responsible
+ * for either uploading the blob or triggering a local download.
  */
-export function generateFullChartPDF(data: PatientData): void {
+export function generateFullChartPDF(data: PatientData): Blob {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -218,14 +221,6 @@ export function generateFullChartPDF(data: PatientData): void {
   addField('Anesthesia End', data.orRecord.anesthesiaEndTime);
   addField('OR Exit Time', data.orRecord.orExitTime);
 
-  // NURSING ORDERS
-  addSectionHeader('NURSING ORDERS');
-  addField('Admit Diagnosis', data.nursingOrders.admitDiagnosis);
-  addField('Vitals Frequency', data.nursingOrders.vitalsFrequency);
-  addField('Activity Orders', data.nursingOrders.activityOrders);
-  addField('Diet', data.nursingOrders.diet);
-  addField('IV Fluids', data.nursingOrders.ivFluids);
-
   // PROGRESS NOTES
   if (data.progressNotes.notes.length > 0) {
     addSectionHeader('PROGRESS NOTES');
@@ -240,6 +235,85 @@ export function generateFullChartPDF(data: PatientData): void {
         addText(note.assessmentPlan, 9, false, 10);
       }
       addField('Provider', note.providerName);
+    });
+  }
+
+  // LABS
+  if (data.labs.length > 0) {
+    addSectionHeader('LABORATORY RESULTS');
+    data.labs.forEach((lab, idx) => {
+      yPosition += 2;
+      addText(`Lab ${idx + 1}: ${lab.testName}`, 10, true);
+      addField('Date Ordered', lab.dateOrdered);
+      addField('Date Resulted', lab.dateResulted);
+      addField('Result', lab.resultValue);
+      addField('Reference Range', lab.referenceRange);
+      addField('Status', lab.status);
+      if (lab.interpretation) {
+        addText('Interpretation:', 9, true, 5);
+        addText(lab.interpretation, 9, false, 10);
+      }
+    });
+  }
+
+  // IMAGING
+  if (data.imaging.length > 0) {
+    addSectionHeader('IMAGING STUDIES');
+    data.imaging.forEach((study, idx) => {
+      yPosition += 2;
+      addText(`Study ${idx + 1}: ${study.studyType}`, 10, true);
+      addField('Body Part', study.bodyPart);
+      addField('Date Ordered', study.dateOrdered);
+      addField('Date Performed', study.datePerformed);
+      if (study.findings) {
+        addText('Findings:', 9, true, 5);
+        addText(study.findings, 9, false, 10);
+      }
+      if (study.impression) {
+        addText('Impression:', 9, true, 5);
+        addText(study.impression, 9, false, 10);
+      }
+
+      // Add images if available
+      if (study.attachments && study.attachments.length > 0) {
+        yPosition += 2;
+        addText('Attached Images:', 9, true, 5);
+
+        study.attachments.forEach((attachment) => {
+          // Only render images (not PDFs or other file types)
+          if (attachment.fileType.startsWith('image/')) {
+            checkPageBreak(60); // Need space for image
+
+            try {
+              // Determine image format from fileType
+              let format = 'JPEG'; // default
+              if (attachment.fileType.includes('png')) {
+                format = 'PNG';
+              } else if (attachment.fileType.includes('gif')) {
+                format = 'GIF';
+              } else if (attachment.fileType.includes('webp')) {
+                format = 'WEBP';
+              }
+
+              // Add image to PDF (50mm wide, auto height)
+              // base64Data is a data URL (data:image/png;base64,...)
+              doc.addImage(attachment.base64Data, format, margin + 10, yPosition, 50, 0);
+              yPosition += 55; // Space for image + caption
+
+              // Add caption
+              doc.setFontSize(8);
+              doc.setFont('helvetica', 'italic');
+              doc.text(attachment.filename, margin + 10, yPosition);
+              yPosition += lineHeight;
+            } catch (error) {
+              console.warn('Could not add image to PDF:', attachment.filename, error);
+              addText(`[Image: ${attachment.filename}]`, 8, false, 10);
+            }
+          } else {
+            addText(`[Attachment: ${attachment.filename}]`, 8, false, 10);
+          }
+        });
+      }
     });
   }
 
@@ -273,6 +347,54 @@ export function generateFullChartPDF(data: PatientData): void {
     addField('RN Verification', data.discharge.rnVerificationName);
   }
 
+  // FOLLOW-UP NOTES
+  if (data.followUpNotes.notes.length > 0) {
+    addSectionHeader('FOLLOW-UP APPOINTMENT NOTES');
+    data.followUpNotes.notes.forEach((note, idx) => {
+      yPosition += 2;
+      addText(`Follow-up Visit ${idx + 1}`, 10, true);
+      addField('Visit Date', note.visitDate);
+      addField('Visit Time', note.visitTime);
+      addField('Chief Complaint', note.chiefComplaint);
+      addField('Pain Level', note.painLevel);
+
+      if (note.intervalHistory) {
+        yPosition += 2;
+        addText('Interval History:', 9, true, 5);
+        addText(note.intervalHistory, 9, false, 10);
+      }
+
+      if (note.woundCheck) {
+        addText('Wound Check:', 9, true, 5);
+        addText(note.woundCheck, 9, false, 10);
+      }
+
+      if (note.complications) {
+        addText('Complications:', 9, true, 5);
+        addText(note.complications, 9, false, 10);
+      }
+
+      if (note.examination) {
+        addText('Examination:', 9, true, 5);
+        addText(note.examination, 9, false, 10);
+      }
+
+      if (note.assessment) {
+        addText('Assessment:', 9, true, 5);
+        addText(note.assessment, 9, false, 10);
+      }
+
+      if (note.plan) {
+        addText('Plan:', 9, true, 5);
+        addText(note.plan, 9, false, 10);
+      }
+
+      addField('Next Follow-up', note.nextFollowUp);
+      addField('Provider', note.providerName);
+      addField('Signature Date', note.providerSignatureDate);
+    });
+  }
+
   // Footer on each page
   const totalPages = doc.internal.pages.length - 1;
   for (let i = 1; i <= totalPages; i++) {
@@ -283,7 +405,7 @@ export function generateFullChartPDF(data: PatientData): void {
     doc.text(`ISHI ID: ${data.ishiId}`, margin, pageHeight - 10);
   }
 
-  // Save PDF
-  const filename = `GH26${data.ishiId}_Chart.pdf`;
-  doc.save(filename);
+  // Return PDF as blob for Google Drive upload and local download
+  // NOTE: Caller is responsible for triggering the download
+  return doc.output('blob');
 }

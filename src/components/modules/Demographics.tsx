@@ -16,7 +16,7 @@ export default function Demographics() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Demographics</h2>
+      <h2 className="text-2xl font-bold mb-6">Patient Information</h2>
 
       <div className="bg-white rounded-lg shadow-sm border border-ayekta-border p-6 space-y-6">
         {/* Personal Information */}

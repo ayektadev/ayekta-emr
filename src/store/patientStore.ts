@@ -18,6 +18,8 @@ import {
   AnesthesiaRecord,
   ORRecord,
   NursingOrders,
+  FollowUpNote,
+  FollowUpNotesModule,
   PACUFlow,
   FloorFlow,
   ProgressNotesModule,
@@ -208,6 +210,14 @@ const initialPreAnesthesia: PreAnesthesia = {
   medicationsAllergies: '',
   substanceUse: '',
   vitals: '',
+  // Structured vitals
+  vitalHR: '',
+  vitalBP: '',
+  vitalRR: '',
+  vitalO2Sat: '',
+  vitalTemp: '',
+  vitalHeight: '',
+  vitalWeight: '',
   airwayAssessment: '',
   rangeOfMotion: '',
   cardiovascularExam: '',
@@ -359,6 +369,10 @@ const initialProgressNotes: ProgressNotesModule = {
   notes: [],
 };
 
+const initialFollowUpNotes: FollowUpNotesModule = {
+  notes: [],
+};
+
 export const usePatientStore = create<AppState>((set, get) => ({
   // Metadata
   ishiId: '',
@@ -394,6 +408,7 @@ export const usePatientStore = create<AppState>((set, get) => ({
   pacu: initialPACU,
   floorFlow: initialFloorFlow,
   progressNotes: initialProgressNotes,
+  followUpNotes: initialFollowUpNotes,
 
   // UI Actions
   setCurrentTab: (tab: TabName) => set({ currentTab: tab }),
@@ -730,14 +745,49 @@ export const usePatientStore = create<AppState>((set, get) => ({
       updatedAt: new Date().toISOString(),
     })),
 
+  // Follow-up Notes actions
+  addFollowUpNote: (note: FollowUpNote) =>
+    set((state) => ({
+      followUpNotes: {
+        notes: [...state.followUpNotes.notes, note],
+      },
+      updatedAt: new Date().toISOString(),
+    })),
+
+  removeFollowUpNote: (id: string) =>
+    set((state) => ({
+      followUpNotes: {
+        notes: state.followUpNotes.notes.filter((note) => note.id !== id),
+      },
+      updatedAt: new Date().toISOString(),
+    })),
+
+  updateFollowUpNote: (id: string, updates: Partial<FollowUpNote>) =>
+    set((state) => ({
+      followUpNotes: {
+        notes: state.followUpNotes.notes.map((note) =>
+          note.id === id ? { ...note, ...updates } : note
+        ),
+      },
+      updatedAt: new Date().toISOString(),
+    })),
+
   // Data management
   savePatient: () => {
     const state = get();
+
+    // Set firstSavedAt on first save only
+    const firstSavedAt = state.firstSavedAt || new Date().toISOString();
+    if (!state.firstSavedAt) {
+      set({ firstSavedAt });
+    }
+
     const patientData: PatientData = {
       ishiId: state.ishiId,
       currentProvider: state.currentProvider,
       createdAt: state.createdAt,
       updatedAt: new Date().toISOString(),
+      firstSavedAt,
       demographics: state.demographics,
       triage: state.triage,
       surgicalNeeds: state.surgicalNeeds,
@@ -754,6 +804,7 @@ export const usePatientStore = create<AppState>((set, get) => ({
       pacu: state.pacu,
       floorFlow: state.floorFlow,
       progressNotes: state.progressNotes,
+      followUpNotes: state.followUpNotes,
     };
 
     // Export as JSON file and save to IndexedDB
@@ -769,6 +820,7 @@ export const usePatientStore = create<AppState>((set, get) => ({
       currentProvider: data.currentProvider,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
+      firstSavedAt: data.firstSavedAt, // Preserve firstSavedAt from loaded data
       demographics: data.demographics,
       triage: data.triage,
       surgicalNeeds: data.surgicalNeeds,
@@ -785,6 +837,7 @@ export const usePatientStore = create<AppState>((set, get) => ({
       pacu: data.pacu,
       floorFlow: data.floorFlow,
       progressNotes: data.progressNotes,
+      followUpNotes: data.followUpNotes || initialFollowUpNotes,
       isLoggedIn: true,
     });
 
@@ -798,6 +851,7 @@ export const usePatientStore = create<AppState>((set, get) => ({
       currentProvider: '',
       createdAt: '',
       updatedAt: '',
+      firstSavedAt: undefined, // Clear firstSavedAt on reset
       currentTab: 'demographics',
       isLoggedIn: false,
       demographics: initialDemographics,
@@ -821,6 +875,7 @@ export const usePatientStore = create<AppState>((set, get) => ({
       pacu: initialPACU,
       floorFlow: initialFloorFlow,
       progressNotes: initialProgressNotes,
+      followUpNotes: initialFollowUpNotes,
     });
   },
 }));

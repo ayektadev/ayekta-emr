@@ -7,16 +7,16 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { id: 'demographics', label: 'Demographics' },
+  { id: 'demographics', label: 'Patient Information' },
   { id: 'triage', label: 'Triage' },
-  { id: 'surgical-needs', label: 'Surgical Needs' },
+  { id: 'surgical-needs', label: 'Surgical Planning' },
   { id: 'consent', label: 'Consent' },
   { id: 'medications', label: 'Medications' },
   { id: 'labs', label: 'Labs' },
   { id: 'imaging', label: 'Imaging' },
   { id: 'operative-note', label: 'Operative Note' },
   // Additional tabs to mirror the paper packet structure
-  { id: 'pre-anesthesia', label: 'Pre‑Anesthesia' },
+  { id: 'pre-anesthesia', label: 'Anesthesia Evaluation' },
   { id: 'anesthesia-record', label: 'Anesthesia Record' },
   { id: 'or-record', label: 'OR Record' },
   { id: 'nursing-orders', label: 'Nursing Orders' },
@@ -24,6 +24,7 @@ const tabs: Tab[] = [
   { id: 'floor-flow', label: 'Floor Flow' },
   { id: 'progress-notes', label: 'Progress Notes' },
   { id: 'discharge', label: 'Discharge' },
+  { id: 'follow-up-notes', label: 'Follow-up Notes' },
 ];
 
 export default function TabNavigation() {
