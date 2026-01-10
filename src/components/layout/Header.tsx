@@ -111,10 +111,41 @@ function Header() {
       // Always save to IndexedDB first (for offline access)
       savePatient();
 
+      // Get fresh patient data from store right before generating PDF
+      const freshPatientData = usePatientStore.getState();
+      const currentPatientData = {
+        ishiId: freshPatientData.ishiId,
+        currentProvider: freshPatientData.currentProvider,
+        currentTab: freshPatientData.currentTab,
+        isLoggedIn: freshPatientData.isLoggedIn,
+        createdAt: freshPatientData.createdAt,
+        updatedAt: freshPatientData.updatedAt,
+        firstSavedAt: freshPatientData.firstSavedAt,
+        demographics: freshPatientData.demographics,
+        triage: freshPatientData.triage,
+        surgicalNeeds: freshPatientData.surgicalNeeds,
+        consent: freshPatientData.consent,
+        medications: freshPatientData.medications,
+        labs: freshPatientData.labs,
+        imaging: freshPatientData.imaging,
+        operativeNote: freshPatientData.operativeNote,
+        preAnesthesia: freshPatientData.preAnesthesia,
+        anesthesiaRecord: freshPatientData.anesthesiaRecord,
+        orRecord: freshPatientData.orRecord,
+        nursingOrders: freshPatientData.nursingOrders,
+        pacu: freshPatientData.pacu,
+        floorFlow: freshPatientData.floorFlow,
+        progressNotes: freshPatientData.progressNotes,
+        followUpNotes: freshPatientData.followUpNotes,
+        discharge: freshPatientData.discharge,
+      };
+
+      console.log('Generating PDF with data updatedAt:', currentPatientData.updatedAt);
+
       // Generate PDF
       let pdfBlob: Blob | null = null;
       try {
-        pdfBlob = generateFullChartPDF(patientData);
+        pdfBlob = generateFullChartPDF(currentPatientData);
       } catch (error) {
         console.error('Error generating PDF:', error);
         setSaveStatus('error');
@@ -123,18 +154,18 @@ function Header() {
         return;
       }
 
-      const jsonContent = JSON.stringify(patientData, null, 2);
+      const jsonContent = JSON.stringify(currentPatientData, null, 2);
 
       // If online and signed in: upload directly to Drive
       if (isOnline && isUserSignedIn() && pdfBlob) {
         console.log('Online and signed in, uploading directly to Drive');
         try {
           await uploadPatientDataToDrive(
-            patientData.ishiId,
+            currentPatientData.ishiId,
             jsonContent,
             pdfBlob,
-            patientData.firstSavedAt,
-            patientData.updatedAt
+            currentPatientData.firstSavedAt,
+            currentPatientData.updatedAt
           );
           console.log('Upload successful, setting status to saved');
           setSaveStatus('saved');
@@ -144,7 +175,7 @@ function Header() {
           console.error('Failed to upload to Google Drive:', error);
           // Queue for later sync
           console.log('Adding to sync queue');
-          await addToSyncQueue(patientData.ishiId, jsonContent, pdfBlob);
+          await addToSyncQueue(currentPatientData.ishiId, jsonContent, pdfBlob);
           // Stay in "Saving..." state (queued for sync)
           setIsUploading(false);
         }
@@ -152,7 +183,7 @@ function Header() {
       // If offline or not signed in: queue for sync
       else if (pdfBlob) {
         console.log('Offline or not signed in, adding to sync queue');
-        await addToSyncQueue(patientData.ishiId, jsonContent, pdfBlob);
+        await addToSyncQueue(currentPatientData.ishiId, jsonContent, pdfBlob);
         // Stay in "Saving..." state (queued for sync)
         setIsUploading(false);
       }
