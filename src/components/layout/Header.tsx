@@ -22,24 +22,27 @@ function Header() {
   useEffect(() => {
     // Mark as having unsaved changes when data updates
     if (saveStatus === 'saved') {
+      console.log('Patient data updated, resetting save status to idle');
       setSaveStatus('idle');
     }
-  }, [updatedAt, saveStatus]);
+  }, [updatedAt]);
 
   // Listen for successful sync events to update status
   useEffect(() => {
-    const handleStorageChange = () => {
+    const handleSyncComplete = () => {
       // When sync queue processes successfully, update status
+      console.log('Sync complete event received, current status:', saveStatus);
       if (saveStatus === 'saving') {
+        console.log('Updating status from saving to saved');
         setSaveStatus('saved');
       }
     };
 
-    // Listen for custom sync event (we'll need to trigger this from sync worker)
-    window.addEventListener('ayekta-sync-complete', handleStorageChange);
+    // Listen for custom sync event
+    window.addEventListener('ayekta-sync-complete', handleSyncComplete);
 
     return () => {
-      window.removeEventListener('ayekta-sync-complete', handleStorageChange);
+      window.removeEventListener('ayekta-sync-complete', handleSyncComplete);
     };
   }, [saveStatus]);
 
@@ -100,6 +103,7 @@ function Header() {
   };
 
   const handleSave = async () => {
+    console.log('Save button clicked');
     setIsUploading(true);
     setSaveStatus('saving');
 
@@ -123,6 +127,7 @@ function Header() {
 
       // If online and signed in: upload directly to Drive
       if (isOnline && isUserSignedIn() && pdfBlob) {
+        console.log('Online and signed in, uploading directly to Drive');
         try {
           await uploadPatientDataToDrive(
             patientData.ishiId,
@@ -131,12 +136,14 @@ function Header() {
             patientData.firstSavedAt,
             patientData.updatedAt
           );
+          console.log('Upload successful, setting status to saved');
           setSaveStatus('saved');
           setIsUploading(false);
           // Keep "Saved" status until next edit
         } catch (error) {
           console.error('Failed to upload to Google Drive:', error);
           // Queue for later sync
+          console.log('Adding to sync queue');
           await addToSyncQueue(patientData.ishiId, jsonContent, pdfBlob);
           // Stay in "Saving..." state (queued for sync)
           setIsUploading(false);
@@ -144,6 +151,7 @@ function Header() {
       }
       // If offline or not signed in: queue for sync
       else if (pdfBlob) {
+        console.log('Offline or not signed in, adding to sync queue');
         await addToSyncQueue(patientData.ishiId, jsonContent, pdfBlob);
         // Stay in "Saving..." state (queued for sync)
         setIsUploading(false);
@@ -199,8 +207,12 @@ function Header() {
           <button
             id="savePatientBtn"
             onClick={handleSave}
-            disabled={isUploading}
-            className="py-2 px-6 bg-ayekta-orange text-white font-bold border-2 border-black rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isUploading || saveStatus === 'saving'}
+            className={`py-2 px-6 text-white font-bold border-2 border-black rounded-md transition-all ${
+              saveStatus === 'saving'
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-ayekta-orange hover:opacity-90'
+            }`}
           >
             {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Error' : 'Save'}
           </button>

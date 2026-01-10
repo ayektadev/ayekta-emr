@@ -13,10 +13,11 @@ import { useOnlineStatus } from '../../hooks/useOnlineStatus';
  * Shows sign-in status, sync queue, and manual sync controls
  */
 export default function GoogleDriveSync() {
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(() => {
+    // Check localStorage for persisted sign-in state
+    return localStorage.getItem('ayekta_drive_signed_in') === 'true';
+  });
   const [isInitializing, setIsInitializing] = useState(true); // Start as true during init
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [queueLength, setQueueLength] = useState(0);
   const [lastSyncMessage, setLastSyncMessage] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
@@ -30,7 +31,22 @@ export default function GoogleDriveSync() {
     initGoogleDrive()
       .then(() => {
         console.log('Google Drive initialized successfully');
-        setIsSignedIn(isUserSignedIn());
+
+        // Check if user is actually signed in via Google API
+        const actuallySignedIn = isUserSignedIn();
+
+        // Verify localStorage state matches actual state
+        const persistedSignIn = localStorage.getItem('ayekta_drive_signed_in') === 'true';
+
+        if (persistedSignIn && !actuallySignedIn) {
+          // User was previously signed in but token expired
+          console.log('Sign-in state expired, clearing localStorage');
+          localStorage.removeItem('ayekta_drive_signed_in');
+          setIsSignedIn(false);
+        } else {
+          setIsSignedIn(actuallySignedIn);
+        }
+
         updateQueueStatus();
         setInitError(null);
         setIsInitializing(false);
@@ -50,8 +66,8 @@ export default function GoogleDriveSync() {
   }, [isOnline]);
 
   const updateQueueStatus = async () => {
-    const status = await getSyncQueueStatus();
-    setQueueLength(status.queueLength);
+    // Just check status without setting state (used for auto-sync trigger)
+    await getSyncQueueStatus();
   };
 
   const handleSignIn = async () => {
@@ -63,6 +79,8 @@ export default function GoogleDriveSync() {
     try {
       await signInToGoogle();
       setIsSignedIn(true);
+      // Persist sign-in state to localStorage
+      localStorage.setItem('ayekta_drive_signed_in', 'true');
       setLastSyncMessage('Signed in to Google Drive');
 
       // Auto-sync after sign-in
@@ -77,6 +95,8 @@ export default function GoogleDriveSync() {
     try {
       await signOutFromGoogle();
       setIsSignedIn(false);
+      // Clear persisted sign-in state
+      localStorage.removeItem('ayekta_drive_signed_in');
       setLastSyncMessage('Signed out from Google Drive');
     } catch (error) {
       console.error('Sign-out failed:', error);
@@ -85,41 +105,44 @@ export default function GoogleDriveSync() {
 
   const handleSync = async () => {
     if (!isSignedIn) {
-      setLastSyncMessage('Please sign in to sync');
+      console.log('Not signed in, skipping sync');
       return;
     }
 
     if (!isOnline) {
-      setLastSyncMessage('No internet connection');
+      console.log('Not online, skipping sync');
       return;
     }
 
-    setIsSyncing(true);
-    setLastSyncMessage('Syncing...');
-
     try {
+      console.log('Processing sync queue...');
       const result = await processSyncQueue();
+      console.log('Sync result:', result);
       await updateQueueStatus();
 
-      if (result.total === 0) {
-        setLastSyncMessage('No data to sync');
-      } else if (result.succeeded === result.total) {
-        setLastSyncMessage(`✓ Synced ${result.succeeded} file(s) successfully`);
+      if (result.succeeded === result.total && result.total > 0) {
+        console.log('All syncs succeeded, dispatching sync-complete event');
         // Dispatch event for header to update status
         window.dispatchEvent(new Event('ayekta-sync-complete'));
-      } else {
-        setLastSyncMessage(
-          `⚠ Synced ${result.succeeded}/${result.total} file(s). ${result.failed} failed.`
-        );
       }
     } catch (error) {
       console.error('Sync failed:', error);
-      setLastSyncMessage('Sync failed. Please try again.');
-    } finally {
-      setIsSyncing(false);
     }
   };
 
+  // If signed in, show only the connectivity indicator
+  if (isSignedIn) {
+    return (
+      <div
+        className={`w-4 h-4 rounded-full shadow-lg ${
+          isOnline ? 'bg-green-500' : 'bg-gray-400'
+        }`}
+        title={isOnline ? 'Online' : 'Offline'}
+      />
+    );
+  }
+
+  // If not signed in, show full sign-in interface
   return (
     <div className="bg-white rounded-lg shadow-lg border border-ayekta-border">
       {/* Compact header - always visible */}
@@ -143,16 +166,6 @@ export default function GoogleDriveSync() {
               isOnline ? 'bg-green-500' : 'bg-gray-400'
             }`}
           />
-
-          {/* Signed in indicator */}
-          {isSignedIn && <span className="text-xs text-green-600">✓</span>}
-
-          {/* Queue indicator */}
-          {queueLength > 0 && (
-            <span className="px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded text-xs font-medium">
-              {queueLength}
-            </span>
-          )}
         </div>
 
         {/* Expand/collapse icon */}
@@ -203,10 +216,10 @@ export default function GoogleDriveSync() {
 
                 <button
                   onClick={handleSync}
-                  disabled={isSyncing || !isOnline}
+                  disabled={!isOnline}
                   className="w-full px-3 py-1.5 bg-ayekta-orange text-white rounded hover:bg-opacity-90 disabled:bg-gray-400 text-xs font-medium transition-colors"
                 >
-                  {isSyncing ? 'Syncing...' : 'Sync Queue Now'}
+                  Sync Queue Now
                 </button>
               </div>
             )}

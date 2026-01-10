@@ -12,7 +12,9 @@
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
       "Bash(curl:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(pkill:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

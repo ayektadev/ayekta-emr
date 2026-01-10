@@ -54,6 +54,14 @@ export async function initGoogleDrive(): Promise<void> {
 
           gisScript.onload = () => {
             gisInit();
+
+            // Restore token from sessionStorage if available
+            const savedToken = sessionStorage.getItem('ayekta_drive_token');
+            if (savedToken) {
+              accessToken = savedToken;
+              console.log('Restored access token from sessionStorage');
+            }
+
             resolve();
           };
 
@@ -89,7 +97,9 @@ export async function signInToGoogle(): Promise<void> {
         }
 
         accessToken = response.access_token;
-        console.log('Successfully obtained access token');
+        // Persist token to sessionStorage
+        sessionStorage.setItem('ayekta_drive_token', accessToken);
+        console.log('Successfully obtained and stored access token');
         resolve();
       };
 
@@ -117,6 +127,8 @@ export async function signOutFromGoogle(): Promise<void> {
       console.log('Access token revoked');
     });
     accessToken = null;
+    // Clear persisted token
+    sessionStorage.removeItem('ayekta_drive_token');
   }
 }
 
