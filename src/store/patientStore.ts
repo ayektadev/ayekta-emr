@@ -25,7 +25,7 @@ import {
   ProgressNotesModule,
 } from '../types/patient.types';
 import { generateIshiId, getCurrentDate, getCurrentTime } from '../utils/calculations';
-import { exportPatientToJSON, saveToStorage, clearStorage } from '../utils/storage';
+import { saveToStorage, clearStorage } from '../utils/storage';
 
 // Initial empty state for all modules
 const initialDemographics: Demographics = {
@@ -807,11 +807,10 @@ export const usePatientStore = create<AppState>((set, get) => ({
       followUpNotes: state.followUpNotes,
     };
 
-    // Export as JSON file and save to IndexedDB
-    const jsonSuccess = exportPatientToJSON(patientData);
+    // Save to IndexedDB only (no local download)
     saveToStorage(patientData); // This is async but we don't wait
 
-    return { jsonSuccess };
+    return { jsonSuccess: true };
   },
 
   loadPatient: (data: PatientData) => {

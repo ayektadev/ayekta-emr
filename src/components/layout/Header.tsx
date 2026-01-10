@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePatientStore } from '../../store/patientStore';
 import { generateFullChartPDF } from '../../utils/fullChartPDF';
 import { uploadPatientDataToDrive, isUserSignedIn } from '../../services/googleDrive';
+import { addToSyncQueue } from '../../services/syncQueue';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 
 function Header() {
   const demographics = usePatientStore((state) => state.demographics);
@@ -11,6 +13,35 @@ function Header() {
   const logout = usePatientStore((state) => state.logout);
 
   const [isUploading, setIsUploading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const isOnline = useOnlineStatus();
+
+  // Track changes to patient data
+  const updatedAt = usePatientStore((state) => state.updatedAt);
+
+  useEffect(() => {
+    // Mark as having unsaved changes when data updates
+    if (saveStatus === 'saved') {
+      setSaveStatus('idle');
+    }
+  }, [updatedAt, saveStatus]);
+
+  // Listen for successful sync events to update status
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // When sync queue processes successfully, update status
+      if (saveStatus === 'saving') {
+        setSaveStatus('saved');
+      }
+    };
+
+    // Listen for custom sync event (we'll need to trigger this from sync worker)
+    window.addEventListener('ayekta-sync-complete', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('ayekta-sync-complete', handleStorageChange);
+    };
+  }, [saveStatus]);
 
   // Get full patient data for PDF generation
   const patientData = usePatientStore((state) => ({
@@ -70,30 +101,29 @@ function Header() {
 
   const handleSave = async () => {
     setIsUploading(true);
+    setSaveStatus('saving');
 
     try {
-      // Save JSON and get result
-      const { jsonSuccess } = savePatient();
+      // Always save to IndexedDB first (for offline access)
+      savePatient();
 
-      // Generate comprehensive PDF
+      // Generate PDF
       let pdfBlob: Blob | null = null;
-      let pdfSuccess = false;
       try {
         pdfBlob = generateFullChartPDF(patientData);
-        pdfSuccess = true;
-
-        // Trigger local PDF download immediately (independent of Google Drive)
-        downloadPDFLocally(pdfBlob, `GH26${patientData.ishiId}_Chart.pdf`);
       } catch (error) {
         console.error('Error generating PDF:', error);
+        setSaveStatus('error');
+        setIsUploading(false);
+        setTimeout(() => setSaveStatus('idle'), 3000);
+        return;
       }
 
-      // Upload to Google Drive if signed in (parallel to local download)
-      let driveUploadSuccess = false;
-      if (isUserSignedIn() && jsonSuccess && pdfSuccess && pdfBlob) {
+      const jsonContent = JSON.stringify(patientData, null, 2);
+
+      // If online and signed in: upload directly to Drive
+      if (isOnline && isUserSignedIn() && pdfBlob) {
         try {
-          const jsonContent = JSON.stringify(patientData, null, 2);
-          // Pass timestamps for Google Drive file metadata
           await uploadPatientDataToDrive(
             patientData.ishiId,
             jsonContent,
@@ -101,42 +131,38 @@ function Header() {
             patientData.firstSavedAt,
             patientData.updatedAt
           );
-          driveUploadSuccess = true;
-          console.log('Files uploaded to Google Drive successfully');
+          setSaveStatus('saved');
+          setIsUploading(false);
+          // Keep "Saved" status until next edit
         } catch (error) {
           console.error('Failed to upload to Google Drive:', error);
+          // Queue for later sync
+          await addToSyncQueue(patientData.ishiId, jsonContent, pdfBlob);
+          // Stay in "Saving..." state (queued for sync)
+          setIsUploading(false);
         }
       }
-
-      // Show appropriate message based on results
-      let message = '';
-      if (jsonSuccess && pdfSuccess) {
-        message = '✅ Patient data saved successfully!\n\nFiles downloaded:\n• GH26' + patientData.ishiId + '.json\n• GH26' + patientData.ishiId + '_Chart.pdf';
-        if (driveUploadSuccess) {
-          message += '\n\n☁️ Files uploaded to Google Drive';
-        } else if (isUserSignedIn()) {
-          message += '\n\n⚠️ Google Drive upload failed (files saved locally)';
-        } else {
-          message += '\n\nℹ️ Sign in to Google Drive to enable cloud backup';
-        }
-      } else if (jsonSuccess && !pdfSuccess) {
-        message = '⚠️ JSON file downloaded successfully, but PDF generation failed.\n\nCheck the console for error details.';
-      } else if (!jsonSuccess && pdfSuccess) {
-        message = '⚠️ PDF file downloaded successfully, but JSON export failed.\n\nCheck the console for error details.';
-      } else {
-        message = '❌ Failed to save patient data.\n\nBoth JSON and PDF exports failed. Check the console for error details.';
+      // If offline or not signed in: queue for sync
+      else if (pdfBlob) {
+        await addToSyncQueue(patientData.ishiId, jsonContent, pdfBlob);
+        // Stay in "Saving..." state (queued for sync)
+        setIsUploading(false);
       }
-
-      alert(message);
-    } finally {
+    } catch (error) {
+      console.error('Save failed:', error);
+      setSaveStatus('error');
       setIsUploading(false);
+      setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
 
-  const handleClearData = () => {
-    if (confirm('Clear all patient data and return to login? This will permanently remove the current record.')) {
-      // reuse logout to clear storage and reset state
-      logout();
+  const handleDownload = () => {
+    try {
+      // Generate and download PDF
+      const pdfBlob = generateFullChartPDF(patientData);
+      downloadPDFLocally(pdfBlob, `GH26${patientData.ishiId}_Chart.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
     }
   };
 
@@ -168,7 +194,7 @@ function Header() {
           )}
         </div>
 
-      {/* Save and Clear Buttons */}
+      {/* Save and Download Buttons */}
         <div className="flex gap-4">
           <button
             id="savePatientBtn"
@@ -176,14 +202,15 @@ function Header() {
             disabled={isUploading}
             className="py-2 px-6 bg-ayekta-orange text-white font-bold border-2 border-black rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isUploading ? 'Saving...' : 'Save Patient'}
+            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Error' : 'Save'}
           </button>
           <button
-            id="clearDataBtn"
-            onClick={handleClearData}
-            className="py-2 px-6 bg-red-600 text-white font-bold border-2 border-black rounded-md hover:opacity-90 transition-opacity"
+            id="downloadPdfBtn"
+            onClick={handleDownload}
+            className="py-2 px-6 text-ayekta-orange font-bold border-2 border-black rounded-md hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: '#FAF7F0' }}
           >
-            Clear Data
+            Download
           </button>
         </div>
       </div>

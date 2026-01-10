@@ -14,22 +14,31 @@ import { useOnlineStatus } from '../../hooks/useOnlineStatus';
  */
 export default function GoogleDriveSync() {
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true); // Start as true during init
   const [isSyncing, setIsSyncing] = useState(false);
   const [queueLength, setQueueLength] = useState(0);
   const [lastSyncMessage, setLastSyncMessage] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
   const isOnline = useOnlineStatus();
 
   useEffect(() => {
     // Initialize Google Drive API on mount
+    setIsInitializing(true);
+    console.log('Initializing Google Drive...');
+
     initGoogleDrive()
       .then(() => {
+        console.log('Google Drive initialized successfully');
         setIsSignedIn(isUserSignedIn());
         updateQueueStatus();
+        setInitError(null);
+        setIsInitializing(false);
       })
       .catch((error) => {
         console.error('Failed to initialize Google Drive:', error);
+        setInitError('Failed to load Google Drive. Please refresh the page.');
+        setIsInitializing(false);
       });
   }, []);
 
@@ -46,7 +55,11 @@ export default function GoogleDriveSync() {
   };
 
   const handleSignIn = async () => {
-    setIsInitializing(true);
+    if (isInitializing) {
+      setLastSyncMessage('Please wait for initialization...');
+      return;
+    }
+
     try {
       await signInToGoogle();
       setIsSignedIn(true);
@@ -57,8 +70,6 @@ export default function GoogleDriveSync() {
     } catch (error) {
       console.error('Sign-in failed:', error);
       setLastSyncMessage('Sign-in failed. Please try again.');
-    } finally {
-      setIsInitializing(false);
     }
   };
 
@@ -94,6 +105,8 @@ export default function GoogleDriveSync() {
         setLastSyncMessage('No data to sync');
       } else if (result.succeeded === result.total) {
         setLastSyncMessage(`✓ Synced ${result.succeeded} file(s) successfully`);
+        // Dispatch event for header to update status
+        window.dispatchEvent(new Event('ayekta-sync-complete'));
       } else {
         setLastSyncMessage(
           `⚠ Synced ${result.succeeded}/${result.total} file(s). ${result.failed} failed.`
@@ -164,13 +177,17 @@ export default function GoogleDriveSync() {
       {isExpanded && (
         <div className="p-3 pt-0 border-t border-gray-200">
           <div className="space-y-2">
-            {!isSignedIn ? (
+            {initError ? (
+              <div className="text-xs text-red-600 text-center p-2 bg-red-50 rounded">
+                {initError}
+              </div>
+            ) : !isSignedIn ? (
               <button
                 onClick={handleSignIn}
                 disabled={isInitializing}
                 className="w-full px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 text-xs font-medium transition-colors"
               >
-                {isInitializing ? 'Initializing...' : 'Sign in'}
+                {isInitializing ? 'Loading...' : 'Sign in'}
               </button>
             ) : (
               <div className="space-y-2">
