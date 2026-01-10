@@ -48,6 +48,13 @@ function Header() {
 
   // Get full patient data for PDF generation
   const patientData = usePatientStore((state) => ({
+    ishiId: state.ishiId,
+    currentProvider: state.currentProvider,
+    currentTab: state.currentTab,
+    isLoggedIn: state.isLoggedIn,
+    createdAt: state.createdAt,
+    updatedAt: state.updatedAt,
+    firstSavedAt: state.firstSavedAt,
     demographics: state.demographics,
     triage: state.triage,
     surgicalNeeds: state.surgicalNeeds,
@@ -65,13 +72,6 @@ function Header() {
     progressNotes: state.progressNotes,
     followUpNotes: state.followUpNotes,
     discharge: state.discharge,
-    ishiId: state.ishiId,
-    currentProvider: state.currentProvider,
-    currentTab: state.currentTab,
-    isLoggedIn: state.isLoggedIn,
-    createdAt: state.createdAt,
-    updatedAt: state.updatedAt,
-    firstSavedAt: state.firstSavedAt,
   }));
 
   const patientName = demographics.firstName || demographics.lastName

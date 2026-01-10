@@ -373,11 +373,17 @@ export async function uploadPatientDataToDrive(
       const pdfArrayBuffer = await blobToArrayBuffer(pdfBlob);
       const pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
 
+      console.log(`PDF blob size: ${pdfBlob.size} bytes, base64 length: ${pdfBase64.length}`);
+
       if (existingPdfId) {
+        console.log(`Updating existing PDF file: ${existingPdfId}`);
         await updateFileInDriveBinary(existingPdfId, pdfBase64, 'application/pdf', updatedAt);
         pdfFileId = existingPdfId;
+        console.log('PDF update complete');
       } else {
+        console.log('Creating new PDF file');
         pdfFileId = await uploadFileToDriveBinary(pdfFileName, pdfBase64, 'application/pdf', folderId, firstSavedAt, updatedAt);
+        console.log(`New PDF created: ${pdfFileId}`);
       }
     }
 
