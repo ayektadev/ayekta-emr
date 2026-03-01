@@ -192,42 +192,6 @@ export default function Demographics() {
               </select>
             </div>
 
-            {/* Blood Transfusion History */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Prior Blood Transfusion</label>
-              <div className="flex gap-4 mb-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="bloodTransfusionHistory"
-                    checked={!demographics.bloodTransfusionHistory}
-                    onChange={() => updateDemographics({ bloodTransfusionHistory: false, bloodTransfusionDetails: '' })}
-                    className="w-4 h-4 text-ayekta-orange border-ayekta-border focus:ring-ayekta-orange"
-                  />
-                  <span className="text-sm">No</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="bloodTransfusionHistory"
-                    checked={demographics.bloodTransfusionHistory}
-                    onChange={() => updateDemographics({ bloodTransfusionHistory: true })}
-                    className="w-4 h-4 text-ayekta-orange border-ayekta-border focus:ring-ayekta-orange"
-                  />
-                  <span className="text-sm">Yes</span>
-                </label>
-              </div>
-              {demographics.bloodTransfusionHistory && (
-                <textarea
-                  value={demographics.bloodTransfusionDetails}
-                  onChange={(e) => updateDemographics({ bloodTransfusionDetails: e.target.value })}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
-                  placeholder="e.g., Received 2 units pRBC in 2018 for GI bleed, no reactions"
-                />
-              )}
-            </div>
-
             <div>
               <label className="block text-sm font-medium mb-1">Allergies</label>
               <textarea
