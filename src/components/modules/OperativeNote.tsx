@@ -84,6 +84,28 @@ export default function OperativeNote() {
             showAnesthesiologist={true}
             label="Surgical Team"
           />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Circulating RN</label>
+              <input
+                type="text"
+                value={operativeNote.circulatingRN}
+                onChange={(e) => handleChange('circulatingRN', e.target.value)}
+                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="Full name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Surgical Technologist</label>
+              <input
+                type="text"
+                value={operativeNote.surgicalTechnologist}
+                onChange={(e) => handleChange('surgicalTechnologist', e.target.value)}
+                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="Full name"
+              />
+            </div>
+          </div>
         </section>
 
         {/* Diagnosis */}
