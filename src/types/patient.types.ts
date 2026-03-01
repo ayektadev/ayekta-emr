@@ -15,8 +15,6 @@ export interface Demographics {
   emergencyContactPhone: string;
   emergencyContactRelationship: string;
   bloodGroup: string;
-  bloodTransfusionHistory: boolean;
-  bloodTransfusionDetails: string;
   allergies: string;
   currentMedications: string;
   pastMedicalHistory: string;
@@ -138,10 +136,6 @@ export interface Consent {
   witnessSignatureDate: string;
   providerName: string;
   providerSignatureDate: string;
-  interpreterUsed: boolean;
-  interpreterLanguage: string;
-  interpreterType: string;
-  interpreterName: string;
 }
 
 export interface Medication {
@@ -222,8 +216,6 @@ export interface OperativeNote {
    * Duration of the case/surgery, e.g., "2 hours", "45 min". Corresponds to the Case duration field on the paper brief op note.
    */
   caseDuration: string;
-  circulatingRN: string;
-  surgicalTechnologist: string;
 }
 
 export interface Discharge {

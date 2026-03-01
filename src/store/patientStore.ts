@@ -42,8 +42,6 @@ const initialDemographics: Demographics = {
   emergencyContactPhone: '',
   emergencyContactRelationship: '',
   bloodGroup: '',
-  bloodTransfusionHistory: false,
-  bloodTransfusionDetails: '',
   allergies: '',
   currentMedications: '',
   pastMedicalHistory: '',
@@ -134,10 +132,6 @@ const initialConsent: Consent = {
   witnessSignatureDate: '',
   providerName: '',
   providerSignatureDate: '',
-  interpreterUsed: false,
-  interpreterLanguage: '',
-  interpreterType: '',
-  interpreterName: '',
 };
 
 const initialOperativeNote: OperativeNote = {
@@ -162,8 +156,6 @@ const initialOperativeNote: OperativeNote = {
 
   // Case duration default
   caseDuration: '',
-  circulatingRN: '',
-  surgicalTechnologist: '',
 };
 
 const initialDischarge: Discharge = {
