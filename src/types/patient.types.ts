@@ -432,10 +432,33 @@ export interface AnesthesiaRecordRow {
    * crystalloid, total sedation bolus). Free‑text to accommodate varying units.
    */
   fluids?: string;
+
+  /**
+   * Urine output measured at this timepoint (e.g., "50 mL"). Allows tracking
+   * fluid balance during the intraoperative period.
+   */
+  urineOutput?: string;
+
+  /**
+   * Vasopressor administered at this timepoint (e.g., "Phenylephrine 100 mcg IV").
+   * Required for CRNA/anesthesiologist credentialing documentation.
+   */
+  vasopressor?: string;
 }
 
 export interface AnesthesiaRecord {
   rows: AnesthesiaRecordRow[];
+
+  /**
+   * Cumulative intraoperative totals summarised at the end of the case.
+   * Complements the per-row time-stamped entries.
+   */
+  totals: {
+    totalIVFluid: string;      // e.g., "1500 mL LR"
+    totalUrineOutput: string;  // e.g., "350 mL"
+    totalBloodLoss: string;    // e.g., "200 mL"
+    vasopressorsUsed: string;  // e.g., "Phenylephrine PRN x3 doses"
+  };
 }
 
 /**

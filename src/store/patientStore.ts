@@ -246,6 +246,12 @@ const initialPreAnesthesia: PreAnesthesia = {
 
 const initialAnesthesiaRecord: AnesthesiaRecord = {
   rows: [],
+  totals: {
+    totalIVFluid: '',
+    totalUrineOutput: '',
+    totalBloodLoss: '',
+    vasopressorsUsed: '',
+  },
 };
 
 const initialORRecord: ORRecord = {

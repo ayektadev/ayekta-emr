@@ -10,6 +10,12 @@ export default function AnesthesiaRecord() {
   const anesthesiaRecord = usePatientStore((state) => state.anesthesiaRecord);
   const updateAnesthesiaRecord = usePatientStore((state) => state.updateAnesthesiaRecord);
 
+  const handleTotalsChange = (field: keyof typeof anesthesiaRecord.totals, value: string) => {
+    updateAnesthesiaRecord({
+      totals: { ...anesthesiaRecord.totals, [field]: value },
+    });
+  };
+
   const handleRowChange = (
     id: string,
     field:
@@ -22,7 +28,9 @@ export default function AnesthesiaRecord() {
       | 'drug'
       | 'notes'
       | 'painScore'
-      | 'fluids',
+      | 'fluids'
+      | 'urineOutput'
+      | 'vasopressor',
     value: string
   ) => {
     const updatedRows = anesthesiaRecord.rows.map((row) =>
@@ -44,6 +52,8 @@ export default function AnesthesiaRecord() {
       notes: '',
       painScore: '',
       fluids: '',
+      urineOutput: '',
+      vasopressor: '',
     };
     updateAnesthesiaRecord({ rows: [...anesthesiaRecord.rows, newRow] });
   };
@@ -63,7 +73,7 @@ export default function AnesthesiaRecord() {
         {anesthesiaRecord.rows.map((row) => (
           <div
             key={row.id}
-            className="bg-white rounded-lg shadow-sm border border-ayekta-border p-4 grid grid-cols-1 md:grid-cols-10 gap-2 items-end"
+            className="bg-white rounded-lg shadow-sm border border-ayekta-border p-4 grid grid-cols-1 md:grid-cols-12 gap-2 items-end"
           >
             {/* Time */}
             <div>
@@ -136,13 +146,37 @@ export default function AnesthesiaRecord() {
 
             {/* Fluids/Drugs Total */}
             <div>
-              <label className="block text-sm font-medium mb-1">Fluids/Drugs</label>
+              <label className="block text-sm font-medium mb-1">IV Fluids</label>
               <input
                 type="text"
                 value={row.fluids || ''}
                 onChange={(e) => handleRowChange(row.id, 'fluids', e.target.value)}
                 className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
-                placeholder="e.g., 500 mL"
+                placeholder="e.g., 500 mL LR"
+              />
+            </div>
+
+            {/* Urine Output */}
+            <div>
+              <label className="block text-sm font-medium mb-1">UO (mL)</label>
+              <input
+                type="text"
+                value={row.urineOutput || ''}
+                onChange={(e) => handleRowChange(row.id, 'urineOutput', e.target.value)}
+                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="mL"
+              />
+            </div>
+
+            {/* Vasopressor */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Vasopressor</label>
+              <input
+                type="text"
+                value={row.vasopressor || ''}
+                onChange={(e) => handleRowChange(row.id, 'vasopressor', e.target.value)}
+                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="Drug + dose"
               />
             </div>
             {/* Event */}
@@ -192,6 +226,53 @@ export default function AnesthesiaRecord() {
         >
           + Add Event
         </button>
+
+        {/* Intraoperative Totals */}
+        <div className="bg-white rounded-lg shadow-sm border border-ayekta-border p-6 mt-2">
+          <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">Intraoperative Totals</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Total IV Fluid</label>
+              <input
+                type="text"
+                value={anesthesiaRecord.totals.totalIVFluid}
+                onChange={(e) => handleTotalsChange('totalIVFluid', e.target.value)}
+                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="e.g., 1500 mL LR"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Total Urine Output</label>
+              <input
+                type="text"
+                value={anesthesiaRecord.totals.totalUrineOutput}
+                onChange={(e) => handleTotalsChange('totalUrineOutput', e.target.value)}
+                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="e.g., 350 mL"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Total Estimated Blood Loss</label>
+              <input
+                type="text"
+                value={anesthesiaRecord.totals.totalBloodLoss}
+                onChange={(e) => handleTotalsChange('totalBloodLoss', e.target.value)}
+                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="e.g., 200 mL"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Vasopressors Used</label>
+              <input
+                type="text"
+                value={anesthesiaRecord.totals.vasopressorsUsed}
+                onChange={(e) => handleTotalsChange('vasopressorsUsed', e.target.value)}
+                className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                placeholder="e.g., Phenylephrine PRN x3 doses"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
