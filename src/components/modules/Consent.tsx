@@ -264,7 +264,7 @@ export default function Consent() {
           <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">Signatures</h3>
           <div className="grid grid-cols-1 gap-6">
             {/* Patient/Guardian Signature */}
-            <div className="p-4 border border-ayekta-border rounded">
+            <div className={`p-4 border border-ayekta-border rounded transition-opacity${!allCheckboxesChecked ? ' opacity-50 pointer-events-none select-none' : ''}`}>
               <h4 className="font-medium mb-3">Patient/Guardian</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -321,7 +321,7 @@ export default function Consent() {
             </div>
 
             {/* Provider Signature */}
-            <div className="p-4 border border-ayekta-border rounded">
+            <div className={`p-4 border border-ayekta-border rounded transition-opacity${!allCheckboxesChecked ? ' opacity-50 pointer-events-none select-none' : ''}`}>
               <SignatureField
                 label="Provider Signature"
                 providerName={consent.providerName}
