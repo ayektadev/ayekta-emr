@@ -28,6 +28,20 @@ export interface Demographics {
   pmhCOPD: boolean;
   pmhBPH: boolean;
   pmhOther: string;
+
+  // Functional capacity (MET score) for anesthesia clearance
+  metActivities: {
+    selfCare: boolean;        // Can dress/bathe/use toilet? (1 MET)
+    walkIndoors: boolean;     // Walk indoors around the house? (1 MET)
+    walkFlat: boolean;        // Walk 1–2 blocks on flat ground? (2 METs)
+    lightHousework: boolean;  // Light housework (dusting, washing dishes)? (2 METs)
+    climbStairs: boolean;     // Climb a flight of stairs or walk up a hill? (4 METs)
+    runShortDistance: boolean; // Run a short distance? (4 METs)
+    heavyHousework: boolean;  // Heavy housework (scrubbing floors, moving furniture)? (4 METs)
+    moderateRecreation: boolean; // Moderate recreational activities (golf, bowling, dancing)? (4 METs)
+    strenuousSports: boolean; // Strenuous sports (swimming, singles tennis, football)? (8 METs)
+  };
+  metScore: number; // Calculated and stored for PDF display
 }
 
 export interface Triage {
