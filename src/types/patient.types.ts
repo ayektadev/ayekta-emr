@@ -42,6 +42,10 @@ export interface Demographics {
     strenuousSports: boolean; // Strenuous sports (swimming, singles tennis, football)? (8 METs)
   };
   metScore: number; // Calculated and stored for PDF display
+
+  // Blood transfusion history (Item 1 — clinical feedback)
+  bloodTransfusionHistory: boolean;
+  bloodTransfusionDetails: string;
 }
 
 export interface Triage {
@@ -150,6 +154,12 @@ export interface Consent {
   witnessSignatureDate: string;
   providerName: string;
   providerSignatureDate: string;
+
+  // Medical interpreter documentation (Item 4 — clinical feedback)
+  interpreterUsed: boolean;
+  interpreterLanguage: string;
+  interpreterType: string; // 'in-person' | 'phone' | 'video' | 'family-member' | ''
+  interpreterName: string;
 }
 
 export interface Medication {
@@ -230,6 +240,10 @@ export interface OperativeNote {
    * Duration of the case/surgery, e.g., "2 hours", "45 min". Corresponds to the Case duration field on the paper brief op note.
    */
   caseDuration: string;
+
+  // Surgical team additions (Item 5 — clinical feedback)
+  circulatingRN: string;
+  surgicalTechnologist: string;
 }
 
 export interface Discharge {

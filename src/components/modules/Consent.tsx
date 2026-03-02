@@ -259,6 +259,86 @@ export default function Consent() {
           </div>
         </section>
 
+        {/* Medical Interpreter */}
+        <section>
+          <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">Medical Interpreter</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Was a medical interpreter used during this consent discussion?
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="interpreterUsed"
+                    checked={!consent.interpreterUsed}
+                    onChange={() => updateConsent({ interpreterUsed: false, interpreterLanguage: '', interpreterType: '', interpreterName: '' })}
+                    className="w-4 h-4 text-ayekta-orange border-ayekta-border focus:ring-ayekta-orange"
+                  />
+                  <span className="text-sm">No</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="interpreterUsed"
+                    checked={consent.interpreterUsed}
+                    onChange={() => updateConsent({ interpreterUsed: true })}
+                    className="w-4 h-4 text-ayekta-orange border-ayekta-border focus:ring-ayekta-orange"
+                  />
+                  <span className="text-sm">Yes</span>
+                </label>
+              </div>
+            </div>
+
+            {consent.interpreterUsed && (
+              <div className="bg-gray-50 border border-ayekta-border rounded-lg p-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Language</label>
+                  <input
+                    type="text"
+                    value={consent.interpreterLanguage}
+                    onChange={(e) => handleChange('interpreterLanguage', e.target.value)}
+                    className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                    placeholder="e.g., Spanish, Hindi, Arabic"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Interpreter Type</label>
+                  <div className="flex flex-wrap gap-4">
+                    {(['in-person', 'phone', 'video', 'family-member'] as const).map((type) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="interpreterType"
+                          checked={consent.interpreterType === type}
+                          onChange={() => handleChange('interpreterType', type)}
+                          className="w-4 h-4 text-ayekta-orange border-ayekta-border focus:ring-ayekta-orange"
+                        />
+                        <span className="text-sm capitalize">{type.replace('-', ' ')}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Interpreter Name / Service <span className="text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={consent.interpreterName}
+                    onChange={(e) => handleChange('interpreterName', e.target.value)}
+                    className="w-full px-3 py-2 border border-ayekta-border rounded focus:outline-none focus:ring-2 focus:ring-ayekta-orange"
+                    placeholder="e.g., AT&T Language Line, Maria Garcia"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* Signatures */}
         <section>
           <h3 className="text-lg font-semibold mb-4 text-ayekta-orange">Signatures</h3>

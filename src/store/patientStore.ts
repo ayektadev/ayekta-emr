@@ -69,6 +69,10 @@ const initialDemographics: Demographics = {
     strenuousSports: false,
   },
   metScore: 0,
+
+  // Blood transfusion history defaults (Item 1)
+  bloodTransfusionHistory: false,
+  bloodTransfusionDetails: '',
 };
 
 const initialTriage: Triage = {
@@ -146,6 +150,12 @@ const initialConsent: Consent = {
   witnessSignatureDate: '',
   providerName: '',
   providerSignatureDate: '',
+
+  // Medical interpreter defaults (Item 4)
+  interpreterUsed: false,
+  interpreterLanguage: '',
+  interpreterType: '',
+  interpreterName: '',
 };
 
 const initialOperativeNote: OperativeNote = {
@@ -170,6 +180,10 @@ const initialOperativeNote: OperativeNote = {
 
   // Case duration default
   caseDuration: '',
+
+  // Surgical team additions (Item 5)
+  circulatingRN: '',
+  surgicalTechnologist: '',
 };
 
 const initialDischarge: Discharge = {
@@ -834,27 +848,66 @@ export const usePatientStore = create<AppState>((set, get) => ({
   },
 
   loadPatient: (data: PatientData) => {
+    // Deep-merge loaded data with initial defaults so that records saved before
+    // a schema change still get proper default values for any new nested objects.
+    // Without this, new fields that are objects/arrays would be `undefined` on
+    // old records and crash components that access them unconditionally on render.
     set({
       ishiId: data.ishiId,
       currentProvider: data.currentProvider,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
-      firstSavedAt: data.firstSavedAt, // Preserve firstSavedAt from loaded data
-      demographics: data.demographics,
-      triage: data.triage,
-      surgicalNeeds: data.surgicalNeeds,
-      consent: data.consent,
+      firstSavedAt: data.firstSavedAt,
+      demographics: {
+        ...initialDemographics,
+        ...data.demographics,
+        // metActivities is a nested object — old records won't have it
+        metActivities: {
+          ...initialDemographics.metActivities,
+          ...(data.demographics?.metActivities ?? {}),
+        },
+      },
+      triage: { ...initialTriage, ...data.triage },
+      surgicalNeeds: { ...initialSurgicalNeeds, ...data.surgicalNeeds },
+      consent: { ...initialConsent, ...data.consent },
       medications: data.medications,
       labs: data.labs,
       imaging: data.imaging,
-      operativeNote: data.operativeNote,
-      discharge: data.discharge,
-      preAnesthesia: data.preAnesthesia,
-      anesthesiaRecord: data.anesthesiaRecord,
-      orRecord: data.orRecord,
-      nursingOrders: data.nursingOrders,
-      pacu: data.pacu,
-      floorFlow: data.floorFlow,
+      operativeNote: { ...initialOperativeNote, ...data.operativeNote },
+      discharge: {
+        ...initialDischarge,
+        ...data.discharge,
+        dischargeCriteria: {
+          ...initialDischarge.dischargeCriteria,
+          ...(data.discharge?.dischargeCriteria ?? {}),
+        },
+      },
+      preAnesthesia: { ...initialPreAnesthesia, ...data.preAnesthesia },
+      anesthesiaRecord: {
+        rows: data.anesthesiaRecord?.rows ?? [],
+        // totals is a nested object — old records won't have it
+        totals: {
+          ...initialAnesthesiaRecord.totals,
+          ...(data.anesthesiaRecord?.totals ?? {}),
+        },
+      },
+      orRecord: { ...initialORRecord, ...data.orRecord },
+      nursingOrders: {
+        ...initialNursingOrders,
+        ...data.nursingOrders,
+        preopMeds: { ...initialNursingOrders.preopMeds, ...(data.nursingOrders?.preopMeds ?? {}) },
+        intraopMeds: { ...initialNursingOrders.intraopMeds, ...(data.nursingOrders?.intraopMeds ?? {}) },
+        pacuMeds: { ...initialNursingOrders.pacuMeds, ...(data.nursingOrders?.pacuMeds ?? {}) },
+        floorMeds: { ...initialNursingOrders.floorMeds, ...(data.nursingOrders?.floorMeds ?? {}) },
+      },
+      pacu: { ...initialPACU, ...data.pacu, rows: data.pacu?.rows ?? [] },
+      floorFlow: {
+        ...initialFloorFlow,
+        ...data.floorFlow,
+        rows: data.floorFlow?.rows ?? [],
+        assessment: { ...initialFloorFlow.assessment, ...(data.floorFlow?.assessment ?? {}) },
+        interventions: { ...initialFloorFlow.interventions, ...(data.floorFlow?.interventions ?? {}) },
+      },
       progressNotes: data.progressNotes,
       followUpNotes: data.followUpNotes || initialFollowUpNotes,
       isLoggedIn: true,
