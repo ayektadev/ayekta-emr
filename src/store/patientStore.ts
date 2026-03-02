@@ -57,20 +57,6 @@ const initialDemographics: Demographics = {
   pmhCOPD: false,
   pmhBPH: false,
   pmhOther: '',
-
-  // Functional capacity (MET score) defaults
-  metActivities: {
-    selfCare: false,
-    walkIndoors: false,
-    walkFlat: false,
-    lightHousework: false,
-    climbStairs: false,
-    runShortDistance: false,
-    heavyHousework: false,
-    moderateRecreation: false,
-    strenuousSports: false,
-  },
-  metScore: 0,
 };
 
 const initialTriage: Triage = {

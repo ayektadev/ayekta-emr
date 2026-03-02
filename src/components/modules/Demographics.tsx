@@ -1,5 +1,5 @@
 import { usePatientStore } from '../../store/patientStore';
-import { calculateAge, calculateMETs } from '../../utils/calculations';
+import { calculateAge } from '../../utils/calculations';
 
 export default function Demographics() {
   const demographics = usePatientStore((state) => state.demographics);
@@ -301,56 +301,6 @@ export default function Demographics() {
                   placeholder="Specify other conditions..."
                 />
               </div>
-            </div>
-
-            {/* Functional Capacity — MET Score */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Functional Capacity (METs) — Anesthesia Clearance
-              </label>
-              <p className="text-xs text-gray-500 mb-3">
-                Check all activities the patient can perform without chest pain or shortness of breath:
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                {([
-                  { key: 'selfCare',           label: 'Can dress, bathe, or use the toilet independently (1 MET)' },
-                  { key: 'walkIndoors',        label: 'Walk indoors around the house (1 MET)' },
-                  { key: 'walkFlat',           label: 'Walk 1–2 blocks on flat ground (2 METs)' },
-                  { key: 'lightHousework',     label: 'Light housework — dusting, washing dishes (2 METs)' },
-                  { key: 'climbStairs',        label: 'Climb a flight of stairs or walk up a hill (4 METs)' },
-                  { key: 'runShortDistance',   label: 'Run a short distance (4 METs)' },
-                  { key: 'heavyHousework',     label: 'Heavy housework — scrubbing floors, moving furniture (4 METs)' },
-                  { key: 'moderateRecreation', label: 'Moderate recreation — golf, bowling, dancing (4 METs)' },
-                  { key: 'strenuousSports',    label: 'Strenuous sports — swimming, tennis, football (8 METs)' },
-                ] as const).map(({ key, label }) => (
-                  <label key={key} className="flex items-start space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={demographics.metActivities[key]}
-                      onChange={(e) => {
-                        const updated = { ...demographics.metActivities, [key]: e.target.checked };
-                        updateDemographics({ metActivities: updated, metScore: calculateMETs(updated) });
-                      }}
-                      className="mt-0.5 w-4 h-4 text-ayekta-orange border-ayekta-border rounded focus:ring-ayekta-orange"
-                    />
-                    <span className="text-sm">{label}</span>
-                  </label>
-                ))}
-              </div>
-              {/* MET score result banner */}
-              {demographics.metScore === 0 ? (
-                <div className="px-3 py-2 rounded bg-gray-100 text-gray-500 text-sm">
-                  Estimated METs: 0 — No activities selected
-                </div>
-              ) : demographics.metScore < 4 ? (
-                <div className="px-3 py-2 rounded bg-amber-50 border border-amber-300 text-amber-800 text-sm">
-                  Estimated METs: {demographics.metScore} — Poor functional capacity. Consider preoperative cardiac workup.
-                </div>
-              ) : (
-                <div className="px-3 py-2 rounded bg-green-50 border border-green-300 text-green-800 text-sm">
-                  Estimated METs: {demographics.metScore} — Adequate functional capacity. May proceed without additional preop cardiac testing.
-                </div>
-              )}
             </div>
 
             <div>

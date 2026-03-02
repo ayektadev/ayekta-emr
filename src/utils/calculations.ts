@@ -72,28 +72,3 @@ export function getCurrentTime(): string {
   const minutes = String(now.getMinutes()).padStart(2, '0');
   return `${hours}:${minutes}`;
 }
-
-/**
- * Calculate MET (Metabolic Equivalent of Task) score from activity checklist.
- * Returns the highest MET level the patient can perform.
- * Used to assess functional capacity for anesthesia clearance (ACC/AHA guidelines:
- * ≥ 4 METs generally indicates adequate capacity without additional cardiac workup).
- */
-export function calculateMETs(activities: {
-  selfCare: boolean;
-  walkIndoors: boolean;
-  walkFlat: boolean;
-  lightHousework: boolean;
-  climbStairs: boolean;
-  runShortDistance: boolean;
-  heavyHousework: boolean;
-  moderateRecreation: boolean;
-  strenuousSports: boolean;
-}): number {
-  if (activities.strenuousSports) return 8;
-  if (activities.heavyHousework || activities.moderateRecreation ||
-      activities.climbStairs || activities.runShortDistance) return 4;
-  if (activities.lightHousework || activities.walkFlat) return 2;
-  if (activities.selfCare || activities.walkIndoors) return 1;
-  return 0;
-}
