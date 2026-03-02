@@ -88,6 +88,15 @@ export function generateFullChartPDF(data: PatientData): Blob {
   addField('Email', data.demographics.email);
   addField('Blood Group', data.demographics.bloodGroup);
 
+  if (data.demographics.metScore > 0) {
+    yPosition += 2;
+    addText('Functional Capacity (METs):', 10, true);
+    const metInterpretation = data.demographics.metScore >= 4
+      ? `${data.demographics.metScore} METs — Adequate functional capacity`
+      : `${data.demographics.metScore} METs — Poor functional capacity; consider preoperative cardiac workup`;
+    addText(metInterpretation, 9, false, 5);
+  }
+
   if (data.demographics.emergencyContactName) {
     yPosition += 2;
     addText('Emergency Contact:', 10, true);
