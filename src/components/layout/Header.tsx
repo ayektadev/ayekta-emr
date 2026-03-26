@@ -236,15 +236,6 @@ function Header() {
 
       {/* Save and Download Buttons */}
         <div className="flex gap-4">
-          {/* Patients Dashboard Link */}
-          <Link
-            to="/patients"
-            className="py-2 px-4 text-gray-600 font-medium border-2 border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
-            title="Patient Dashboard"
-          >
-            📋 Patients
-          </Link>
-          
           {/* Settings Link */}
           <Link
             to="/settings"
