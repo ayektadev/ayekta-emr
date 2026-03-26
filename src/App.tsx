@@ -9,7 +9,6 @@ import TabNavigation from './components/layout/TabNavigation';
 import GoogleDriveSync from './components/shared/GoogleDriveSync';
 import LazyModuleLoader from './components/shared/LazyModuleLoader';
 import Settings from './components/settings/Settings';
-import PatientList from './components/patients/PatientList';
 
 function App() {
   const isLoggedIn = usePatientStore((state) => state.isLoggedIn);
@@ -45,13 +44,10 @@ function App() {
   return (
     <div className="app min-h-screen bg-gray-50">
       <Routes>
-        {/* Patient List / Dashboard Route */}
-        <Route path="/patients" element={<PatientList />} />
-        
         {/* Settings Route */}
         <Route path="/settings" element={<Settings />} />
         
-        {/* Main App Route - Default */}
+        {/* Main App Route */}
         <Route
           path="/*"
           element={
