@@ -1,42 +1,30 @@
 import { usePatientStore } from './store/patientStore';
 import { useAutoSave } from './hooks/useAutoSave';
 import { useRestorePatient } from './hooks/useRestorePatient';
+import { useModuleInitialization } from './hooks/useModules';
+import { Routes, Route } from 'react-router-dom';
 import LoginScreen from './components/layout/LoginScreen';
 import Header from './components/layout/Header';
 import TabNavigation from './components/layout/TabNavigation';
 import GoogleDriveSync from './components/shared/GoogleDriveSync';
-
-// Module imports
-import Demographics from './components/modules/Demographics';
-import Triage from './components/modules/Triage';
-import SurgicalNeeds from './components/modules/SurgicalNeeds';
-import Consent from './components/modules/Consent';
-import Medications from './components/modules/Medications';
-import Labs from './components/modules/Labs';
-import Imaging from './components/modules/Imaging';
-import OperativeNote from './components/modules/OperativeNote';
-import Discharge from './components/modules/Discharge';
-import PreAnesthesia from './components/modules/PreAnesthesia';
-import AnesthesiaRecord from './components/modules/AnesthesiaRecord';
-import ORRecord from './components/modules/ORRecord';
-import NursingOrders from './components/modules/NursingOrders';
-import PACU from './components/modules/PACU';
-import FloorFlow from './components/modules/FloorFlow';
-import ProgressNotes from './components/modules/ProgressNotes';
-import FollowUpNotes from './components/modules/FollowUpNotes';
+import LazyModuleLoader from './components/shared/LazyModuleLoader';
+import Settings from './components/settings/Settings';
 
 function App() {
   const isLoggedIn = usePatientStore((state) => state.isLoggedIn);
   const currentTab = usePatientStore((state) => state.currentTab);
-  
+
   // Auto-save to IndexedDB
   useAutoSave();
-  
+
   // Restore patient from IndexedDB on app start
   const isRestoring = useRestorePatient();
 
-  // Show loading while checking for saved patient
-  if (isRestoring) {
+  // Initialize module system
+  const { isInitializing: modulesInitializing } = useModuleInitialization();
+
+  // Show loading while checking for saved patient or initializing modules
+  if (isRestoring || modulesInitializing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -55,34 +43,51 @@ function App() {
 
   return (
     <div className="app min-h-screen bg-gray-50">
-      <Header />
-      <TabNavigation />
+      <Routes>
+        {/* Settings Route */}
+        <Route path="/settings" element={<Settings />} />
+        
+        {/* Main App Route */}
+        <Route
+          path="/*"
+          element={
+            <>
+              <Header />
+              <TabNavigation />
 
-      {/* Google Drive Sync - Fixed position bottom right, compact */}
-      <div className="fixed bottom-4 right-4 z-[1000] w-48">
-        <GoogleDriveSync />
+              {/* Google Drive Sync - Fixed position bottom right, compact */}
+              <div className="fixed bottom-4 right-4 z-[1000] w-48">
+                <GoogleDriveSync />
+              </div>
+
+              {/* Tab content panels - lazy loaded modules based on currentTab */}
+              <main className="pt-2">
+                <LazyModuleLoader
+                  moduleId={currentTab}
+                  fallback={<ModuleTransitionFallback />}
+                />
+              </main>
+            </>
+          }
+        />
+      </Routes>
+    </div>
+  );
+}
+
+// ============================================================================
+// MODULE TRANSITION FALLBACK
+// ============================================================================
+
+function ModuleTransitionFallback() {
+  return (
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-ayekta-border p-8">
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ayekta-orange"></div>
+        </div>
+        <p className="text-center text-ayekta-muted mt-4">Loading module...</p>
       </div>
-
-      {/* Tab content panels - conditional rendering based on currentTab */}
-      <main className="pt-2">
-        {currentTab === 'demographics' && <Demographics />}
-        {currentTab === 'triage' && <Triage />}
-        {currentTab === 'surgical-needs' && <SurgicalNeeds />}
-        {currentTab === 'consent' && <Consent />}
-        {currentTab === 'medications' && <Medications />}
-        {currentTab === 'labs' && <Labs />}
-        {currentTab === 'imaging' && <Imaging />}
-        {currentTab === 'operative-note' && <OperativeNote />}
-        {currentTab === 'discharge' && <Discharge />}
-        {currentTab === 'pre-anesthesia' && <PreAnesthesia />}
-        {currentTab === 'anesthesia-record' && <AnesthesiaRecord />}
-        {currentTab === 'or-record' && <ORRecord />}
-        {currentTab === 'nursing-orders' && <NursingOrders />}
-        {currentTab === 'pacu' && <PACU />}
-        {currentTab === 'floor-flow' && <FloorFlow />}
-        {currentTab === 'progress-notes' && <ProgressNotes />}
-        {currentTab === 'follow-up-notes' && <FollowUpNotes />}
-      </main>
     </div>
   );
 }

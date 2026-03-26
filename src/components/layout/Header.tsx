@@ -4,6 +4,7 @@ import { generateFullChartPDF } from '../../utils/fullChartPDF';
 import { uploadPatientDataToDrive, isUserSignedIn } from '../../services/googleDrive';
 import { addToSyncQueue } from '../../services/syncQueue';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { Link } from 'react-router-dom';
 
 function Header() {
   const demographics = usePatientStore((state) => state.demographics);
@@ -235,6 +236,15 @@ function Header() {
 
       {/* Save and Download Buttons */}
         <div className="flex gap-4">
+          {/* Settings Link */}
+          <Link
+            to="/settings"
+            className="py-2 px-4 text-gray-600 font-medium border-2 border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+            title="Settings"
+          >
+            ⚙️ Settings
+          </Link>
+          
           <button
             id="savePatientBtn"
             onClick={handleSave}
