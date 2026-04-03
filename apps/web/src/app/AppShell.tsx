@@ -4,8 +4,10 @@ import { useAuthStore } from '../store/authStore';
 import { signOutAndResetChart } from '../services/session';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `block rounded-md px-3 py-2 text-sm font-medium ${
-    isActive ? 'bg-ayekta-orange text-white' : 'text-gray-700 hover:bg-gray-200'
+  `block rounded-sm px-3 py-2 text-sm font-medium border-l-2 transition-colors ${
+    isActive
+      ? 'border-ayekta-orange bg-white text-gray-900'
+      : 'border-transparent text-gray-600 hover:bg-white/60 hover:text-gray-900'
   }`;
 
 export function AppShell() {
@@ -14,12 +16,9 @@ export function AppShell() {
   const items = user ? navForRole(user.role) : [];
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      <aside
-        className="w-56 shrink-0 border-r border-ayekta-border p-4 flex flex-col gap-1"
-        style={{ backgroundColor: '#FAF7F0' }}
-      >
-        <div className="font-bold text-lg mb-4 tracking-tight">Ayekta</div>
+    <div className="min-h-screen flex bg-[var(--ayekta-surface)] font-clinical">
+      <aside className="w-56 shrink-0 border-r border-ayekta-border p-4 flex flex-col gap-1 bg-[var(--ayekta-sidebar)]">
+        <div className="font-semibold text-sm uppercase tracking-wide text-gray-500 mb-4">Ayekta</div>
         <nav className="flex flex-col gap-0.5">
           {items.map((item) => (
             <NavLink key={item.to} to={item.to} className={linkClass} end={item.to === '/dashboard'}>
@@ -30,7 +29,7 @@ export function AppShell() {
         <div className="flex-1" />
         <button
           type="button"
-          className="mt-4 text-left text-sm text-red-700 hover:underline"
+          className="mt-4 text-left text-sm text-red-800 hover:underline font-medium"
           onClick={async () => {
             await signOutAndResetChart();
             navigate('/login');
@@ -40,9 +39,9 @@ export function AppShell() {
         </button>
       </aside>
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="border-b border-ayekta-border px-4 py-2 flex justify-between items-center bg-white">
-          <span className="font-medium">{user?.displayName ?? '—'}</span>
-          <span className="text-xs text-gray-500 uppercase tracking-wide">{user?.role}</span>
+        <header className="border-b border-ayekta-border px-4 py-2.5 flex justify-between items-center bg-[var(--ayekta-surface-elevated)]">
+          <span className="text-sm font-medium text-gray-900">{user?.displayName ?? '—'}</span>
+          <span className="text-xs text-gray-500 tabular-nums">{user?.role}</span>
         </header>
         <Outlet />
       </div>

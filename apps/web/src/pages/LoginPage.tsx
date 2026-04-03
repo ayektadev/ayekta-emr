@@ -29,24 +29,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center p-6"
-      style={{ backgroundColor: '#F4F1E8' }}
-    >
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[var(--ayekta-surface)] font-clinical">
       <img
         src={`${import.meta.env.BASE_URL}logo-512.png`}
-        alt="Ayekta"
-        className="w-48 h-48 mb-6"
+        alt=""
+        className="w-24 h-24 mb-5 opacity-90"
       />
-      <h1 className="text-2xl font-bold mb-1">Ayekta</h1>
-      <p className="text-ayekta-muted mb-6 text-center max-w-md">
-        Offline-first EMR — mock sign-in (Dexie-cached session). Use{' '}
-        <code className="text-sm bg-white/60 px-1 rounded">surgeon / surgeon</code>,{' '}
-        <code className="text-sm bg-white/60 px-1 rounded">nurse / nurse</code>, or{' '}
-        <code className="text-sm bg-white/60 px-1 rounded">admin / admin</code>.
+      <h1 className="text-xl font-semibold text-gray-900 tracking-tight mb-1">Ayekta EMR</h1>
+      <p className="text-sm text-ayekta-muted mb-6 text-center max-w-md leading-relaxed">
+        Sign in to continue. Demo accounts: surgeon, nurse, or admin — password matches username.
       </p>
 
-      <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4 bg-white/80 p-6 rounded-lg border border-ayekta-border shadow-sm">
+      <form
+        onSubmit={onSubmit}
+        className="w-full max-w-sm space-y-4 bg-[var(--ayekta-surface-elevated)] p-6 rounded-md border border-ayekta-border shadow-sm"
+      >
         <div>
           <label htmlFor="username" className="block text-sm font-medium mb-1">
             Username
@@ -75,7 +72,7 @@ export default function LoginPage() {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button
           type="submit"
-          className="w-full py-2 bg-ayekta-orange text-white font-semibold rounded-md border-2 border-black hover:opacity-90"
+          className="w-full py-2.5 bg-ayekta-orange text-white text-sm font-medium rounded-md border border-gray-800 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[var(--ayekta-focus-ring)]"
         >
           Sign in
         </button>

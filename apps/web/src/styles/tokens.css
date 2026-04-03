@@ -1,0 +1,17 @@
+/**
+ * Ayekta v2 design tokens — clinical SaaS direction (austere, readable).
+ * Prefer these variables in new UI; Tailwind maps key surfaces in tailwind.config.js.
+ */
+:root {
+  --ayekta-font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ayekta-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --ayekta-surface: #f5f6f8;
+  --ayekta-surface-elevated: #ffffff;
+  --ayekta-sidebar: #eef0f4;
+  --ayekta-border-subtle: #d1d5db;
+  --ayekta-text: #1f2937;
+  --ayekta-text-muted: #6b7280;
+  --ayekta-accent: #c2410c;
+  --ayekta-accent-muted: #ea580c;
+  --ayekta-focus-ring: rgba(194, 65, 12, 0.35);
+}

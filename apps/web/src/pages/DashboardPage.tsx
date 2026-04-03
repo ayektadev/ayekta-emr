@@ -39,7 +39,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-8 max-w-2xl font-clinical">
       <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
       <p className="text-gray-600 mb-8">
         Signed in as <strong>{user?.displayName}</strong>. Chart data is stored locally in IndexedDB

@@ -1,4 +1,6 @@
 import { getAyektaDB } from '../db/dexie/database';
+import { hashPayloadUtf8 } from '../db/repositories/persistenceBridge';
+import { enqueueSyncOutbox, listPendingOutbox } from '../db/repositories/syncOutboxRepository';
 
 export interface QueuedSync {
   id: string;
@@ -35,13 +37,27 @@ export async function addToSyncQueue(
   try {
     const db = getAyektaDB();
     const clientId = `sync_${ishiId}_${Date.now()}`;
+    const createdAt = Date.now();
     await db.syncQueue.add({
       clientId,
       ishiId,
       jsonContent,
       pdfBlob,
-      timestamp: Date.now(),
+      timestamp: createdAt,
       attempts: 0,
+    });
+    const payloadHash = await hashPayloadUtf8(jsonContent);
+    await enqueueSyncOutbox({
+      clientId,
+      entityType: 'chart_bundle',
+      entityId: ishiId,
+      versionId: null,
+      operation: 'push',
+      payloadHash,
+      createdAt,
+      retryCount: 0,
+      status: 'pending',
+      lastError: null,
     });
     console.log('Added to sync queue:', ishiId);
   } catch (error) {
@@ -78,11 +94,14 @@ export async function processSyncQueue(): Promise<{
   total: number;
 }> {
   const queue = await getSyncQueue();
+  const outbox = await listPendingOutbox();
   console.info(
-    '[sync] Remote sync parked; queued items retained for future API:',
-    queue.length
+    '[sync] Remote sync parked; legacy queue:',
+    queue.length,
+    'structured outbox pending:',
+    outbox.length
   );
-  return { succeeded: 0, failed: 0, total: queue.length };
+  return { succeeded: 0, failed: 0, total: queue.length + outbox.length };
 }
 
 export async function getSyncQueueStatus(): Promise<{
@@ -107,6 +126,7 @@ export async function clearSyncQueue(): Promise<void> {
   try {
     const db = getAyektaDB();
     await db.syncQueue.clear();
+    await db.syncOutbox.clear();
     console.log('Sync queue cleared');
   } catch (error) {
     console.error('Error clearing sync queue:', error);

@@ -1,7 +1,9 @@
 import localforage from 'localforage';
 import type { PatientData } from '../../types/patient.types';
 import type { ModulePreferences, MissionConfig } from '../../types/module.types';
-import { getAyektaDB, CHART_DRAFT_KEY, KV } from './database';
+import { CHART_DRAFT_KEY } from '../constants';
+import { persistChartSnapshot } from '../repositories/persistenceBridge';
+import { getAyektaDB, KV } from './database';
 
 const LEGACY_PATIENT_DB = localforage.createInstance({
   name: 'ayekta-emr',
@@ -36,6 +38,7 @@ export async function migrateFromLocalforage(): Promise<void> {
     const legacyPatient = await LEGACY_PATIENT_DB.getItem<PatientData>('current-patient');
     if (legacyPatient?.ishiId && legacyPatient.demographics) {
       await db.chartDraft.put({ key: CHART_DRAFT_KEY, payload: legacyPatient });
+      await persistChartSnapshot(legacyPatient);
     }
   }
 

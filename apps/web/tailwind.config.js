@@ -7,13 +7,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        'ayekta-orange': '#ef4826',
-        'ayekta-border': '#bdbdbd',
-        'ayekta-muted': '#666',
-        'ayekta-tab': '#f3f3f3',
+        'ayekta-orange': '#c2410c',
+        'ayekta-border': '#d1d5db',
+        'ayekta-muted': '#6b7280',
+        'ayekta-tab': '#f3f4f6',
       },
       fontFamily: {
-        'mono': ['ui-monospace', 'Menlo', 'Consolas', 'monospace'],
+        clinical: [
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
+        mono: ['ui-monospace', 'Menlo', 'Consolas', 'monospace'],
       },
     },
   },

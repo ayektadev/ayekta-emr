@@ -17,7 +17,7 @@ export default function Settings() {
   const [activeTab, setActiveTab] = useState<'modules' | 'roles' | 'missions'>('modules');
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 font-clinical">
       {/* Header */}
       <div className="bg-white border-b border-ayekta-border">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -34,19 +34,16 @@ export default function Settings() {
           <nav className="flex gap-6">
             <TabButton
               label="Modules"
-              icon="🔌"
               isActive={activeTab === 'modules'}
               onClick={() => setActiveTab('modules')}
             />
             <TabButton
               label="Roles"
-              icon="👥"
               isActive={activeTab === 'roles'}
               onClick={() => setActiveTab('roles')}
             />
             <TabButton
               label="Missions"
-              icon="🏥"
               isActive={activeTab === 'missions'}
               onClick={() => setActiveTab('missions')}
             />
@@ -70,25 +67,24 @@ export default function Settings() {
 
 interface TabButtonProps {
   label: string;
-  icon: string;
   isActive: boolean;
   onClick: () => void;
 }
 
-function TabButton({ label, icon, isActive, onClick }: TabButtonProps) {
+function TabButton({ label, isActive, onClick }: TabButtonProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`
         px-4 py-3 text-sm font-medium border-b-2 transition-colors
         ${
           isActive
-            ? 'border-ayekta-orange text-ayekta-orange'
+            ? 'border-ayekta-orange text-gray-900'
             : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
         }
       `}
     >
-      <span className="mr-2">{icon}</span>
       {label}
     </button>
   );
