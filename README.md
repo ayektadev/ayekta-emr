@@ -56,35 +56,24 @@ npm run preview
 
 ### First Launch
 
-1. Open browser to `http://localhost:5173`
-2. Select a provider from dropdown
-3. Click "New Patient" to start a new record
-4. Click "Existing Patient" to load a JSON file
+1. Open `http://localhost:5173` (or your dev server URL)
+2. Sign in with mock accounts: `surgeon` / `surgeon`, `nurse` / `nurse`, or `admin` / `admin`
+3. From **Dashboard**, start a new chart, import JSON, or continue an autosaved draft
+4. Clinical modules live under **Chart** in the sidebar
 
 ## 📁 Project Structure
 
 ```
-ayekta-emr-react/
-├── public/
-│   ├── logo-192.png          # App icon (192x192)
-│   └── logo-512.png          # App icon (512x512)
-├── src/
-│   ├── components/
-│   │   ├── common/           # Reusable UI components
-│   │   ├── layout/           # Layout components
-│   │   └── modules/          # Clinical module components
-│   ├── hooks/                # Custom React hooks
-│   ├── store/                # Zustand state management
-│   ├── types/                # TypeScript definitions
-│   ├── utils/                # Utility functions
-│   ├── styles/               # CSS files
-│   ├── App.tsx               # Root component
-│   └── main.tsx              # Entry point
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── tailwind.config.js
+ayekta-emr/
+├── apps/web/                 # Vite React PWA
+│   ├── public/
+│   ├── src/
+│   ├── index.html
+│   ├── vite.config.ts
+│   └── package.json
+├── packages/shared-types/    # Tenant, roles, routes, domain stubs
+├── docs/v2/                  # Postgres + FHIR drafts (Phase 1)
+└── package.json              # npm workspaces (root scripts)
 ```
 
 ## 🏗️ Architecture
@@ -97,7 +86,7 @@ ayekta-emr-react/
 - **State Management**: Zustand
 - **Forms**: React Hook Form
 - **Validation**: Zod
-- **Storage**: localForage (IndexedDB)
+- **Storage**: Dexie (IndexedDB) + legacy localforage one-shot migration
 - **PDF Generation**: jsPDF
 - **PWA**: vite-plugin-pwa
 - **Styling**: Tailwind CSS + Legacy CSS
