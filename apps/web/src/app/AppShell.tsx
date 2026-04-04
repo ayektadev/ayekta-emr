@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { signOutAndResetChart } from '../services/session';
 import { SyncStatusBadge } from '../components/sync/SyncStatusBadge';
 import { SyncBootstrap } from '../components/sync/SyncBootstrap';
+import StaticDemoBanner from '../components/layout/StaticDemoBanner';
 
 const SIDEBAR_LS_KEY = 'ayekta-sidebar-collapsed';
 
@@ -125,6 +126,7 @@ export function AppShell() {
             <span className="text-xs text-gray-500 tabular-nums capitalize">{user?.role}</span>
           </div>
         </header>
+        <StaticDemoBanner />
         <main id="main-content" className="flex-1 flex flex-col min-h-0 outline-none" tabIndex={-1}>
           <Outlet />
         </main>

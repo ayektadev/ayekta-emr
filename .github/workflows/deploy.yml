@@ -25,8 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Path B: set repo secrets VITE_SYNC_API_BASE (e.g. https://your-api.onrender.com) and
-      # optional VITE_SYNC_TENANT_SLUG (default: default). If unset, build runs offline-only demo mode.
+      # Static GitHub Pages demo: leave secrets unset — mock login + local IndexedDB only.
+      # Later (Render + Supabase): add VITE_SYNC_API_BASE and optional VITE_SYNC_TENANT_SLUG.
       - name: Build
         env:
           VITE_SYNC_API_BASE: ${{ secrets.VITE_SYNC_API_BASE }}

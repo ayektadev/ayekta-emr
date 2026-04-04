@@ -1,6 +1,8 @@
 import { useState, FormEvent } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import StaticDemoBanner from '../components/layout/StaticDemoBanner';
+import { isStaticDemoBuild } from '../utils/deploymentMode';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -28,8 +30,12 @@ export default function LoginPage() {
     navigate(from, { replace: true });
   };
 
+  const staticDemo = isStaticDemoBuild();
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[var(--ayekta-surface)] font-sans antialiased">
+    <div className="min-h-screen flex flex-col bg-[var(--ayekta-surface)] font-sans antialiased">
+      <StaticDemoBanner />
+      <div className="flex flex-1 flex-col items-center justify-center p-6">
       <img
         src={`${import.meta.env.BASE_URL}logo-512.png`}
         alt=""
@@ -37,13 +43,21 @@ export default function LoginPage() {
       />
       <h1 className="text-xl font-semibold text-gray-900 tracking-tight mb-1">Ayekta EMR</h1>
       <p className="text-sm text-gray-600 mb-6 text-center max-w-md leading-relaxed">
-        Sign in to continue. If <code className="text-xs bg-gray-100 px-1">VITE_SYNC_API_BASE</code> points at
-        the API with <code className="text-xs bg-gray-100 px-1">JWT_SECRET</code> set, this form calls{' '}
-        <code className="text-xs bg-gray-100 px-1">POST /auth/login</code> (tenant slug{' '}
-        <code className="text-xs bg-gray-100 px-1">default</code> unless{' '}
-        <code className="text-xs bg-gray-100 px-1">VITE_SYNC_TENANT_SLUG</code> is set). Otherwise use offline
-        demo accounts: <strong>surgeon</strong>, <strong>nurse</strong>, or <strong>admin</strong> with the same
-        password.
+        {staticDemo ? (
+          <>
+            This site is a <strong>static preview</strong> of the app shell and chart UI. Data stays in your
+            browser only. Sign in with demo accounts: <strong>surgeon</strong>, <strong>nurse</strong>, or{' '}
+            <strong>admin</strong> — use the same word as the password (e.g. <code className="text-xs bg-gray-100 px-1 rounded">surgeon</code> /{' '}
+            <code className="text-xs bg-gray-100 px-1 rounded">surgeon</code>).
+          </>
+        ) : (
+          <>
+            Sign in to continue. This build uses your configured API for{' '}
+            <code className="text-xs bg-gray-100 px-1 rounded">POST /auth/login</code> (tenant slug from{' '}
+            <code className="text-xs bg-gray-100 px-1 rounded">VITE_SYNC_TENANT_SLUG</code> when set). If the API
+            is unavailable, demo accounts may still work when the server allows it.
+          </>
+        )}
       </p>
 
       <form
@@ -83,6 +97,7 @@ export default function LoginPage() {
           Sign in
         </button>
       </form>
+      </div>
     </div>
   );
 }
