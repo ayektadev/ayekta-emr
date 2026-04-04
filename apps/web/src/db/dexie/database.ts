@@ -44,6 +44,8 @@ export interface AuthSessionRow {
   tenantId: string;
   facilityId: string;
   trustedUntil: number;
+  /** API JWT when using `POST /auth/login` (Chunk B). */
+  accessToken?: string;
 }
 
 export class AyektaDB extends Dexie {

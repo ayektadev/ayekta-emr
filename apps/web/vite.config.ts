@@ -6,9 +6,15 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+/**
+ * GitHub Pages + offline PWA: keep in sync with `BrowserRouter` basename in `src/main.tsx`
+ * and PWA `start_url` below. See `docs/v2/github-pages-offline-pwa.md`.
+ */
+const APP_BASE = '/ayekta-emr/';
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/ayekta-emr/',
+  base: APP_BASE,
   plugins: [
     react(),
     VitePWA({
@@ -35,7 +41,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,json}'],
+        globPatterns: ['**/*.{js,css,html,png,json,webmanifest}'],
+        /** When a document request fails (e.g. uncached deep link while offline), serve static offline shell. */
+        navigateFallback: `${APP_BASE.replace(/\/$/, '')}/offline.html`,
+        navigateFallbackDenylist: [/^\/__/, /\.[a-zA-Z0-9]+$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

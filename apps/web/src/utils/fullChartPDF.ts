@@ -175,6 +175,16 @@ export function generateFullChartPDF(data: PatientData): Blob {
     });
   }
 
+  // PRE-OP CHECKLIST (Phase 5)
+  addSectionHeader('PRE-OP CHECKLIST');
+  addField('ASA class', data.preOpChecklist.asaClass);
+  addField('Consent obtained', data.preOpChecklist.consentObtained);
+  addField('DVT prophylaxis plan', data.preOpChecklist.dvtProphylaxisPlan);
+  if (data.preOpChecklist.notes) {
+    addText('Checklist notes:', 9, true, 5);
+    addText(data.preOpChecklist.notes, 9, false, 10);
+  }
+
   // PRE-ANESTHESIA
   addSectionHeader('PRE-ANESTHESIA EVALUATION');
   addField('ASA Class', data.preAnesthesia.asaClass);
@@ -209,8 +219,51 @@ export function generateFullChartPDF(data: PatientData): Blob {
   }
 
   addField('EBL', data.operativeNote.estimatedBloodLoss);
+  addField('EBL mL (registry)', data.operativeNote.opNoteEblMl);
   addField('Complications', data.operativeNote.complications);
+  addField('Complication class', data.operativeNote.opNoteComplicationClass);
   addField('Case Duration', data.operativeNote.caseDuration);
+  addField('Procedure category', data.operativeNote.opNoteProcedureCategory);
+  addField('Closure', data.operativeNote.opNoteClosure);
+  addField('Drains', data.operativeNote.opNoteDrains);
+  if (data.operativeNote.opNoteOutcomeNarrative) {
+    yPosition += 2;
+    addText('Outcome (registry):', 10, true);
+    addText(data.operativeNote.opNoteOutcomeNarrative, 9, false, 5);
+  }
+
+  if (data.complicationLog.length > 0) {
+    addSectionHeader('COMPLICATIONS LOG');
+    data.complicationLog.forEach((row, idx) => {
+      yPosition += 2;
+      addText(`Event ${idx + 1}`, 10, true);
+      addField('Recorded', row.recordedAt);
+      addField('Timing', row.timing);
+      addField('Severity', row.severity);
+      addField('Category', row.category);
+      if (row.description) {
+        addText('Description:', 9, true, 5);
+        addText(row.description, 9, false, 10);
+      }
+      if (row.management) {
+        addText('Management:', 9, true, 5);
+        addText(row.management, 9, false, 10);
+      }
+      addField('Recorded by', row.recordedBy);
+    });
+  }
+
+  addSectionHeader('SURGICAL OUTCOMES');
+  addField('Immediate outcome', data.surgicalOutcomes.immediateOutcome);
+  addField('Disposition from OR', data.surgicalOutcomes.dispositionFromOR);
+  if (data.surgicalOutcomes.outcomeNarrative) {
+    addText('Outcome narrative:', 9, true, 5);
+    addText(data.surgicalOutcomes.outcomeNarrative, 9, false, 10);
+  }
+  if (data.surgicalOutcomes.unexpectedFindings) {
+    addText('Unexpected findings:', 9, true, 5);
+    addText(data.surgicalOutcomes.unexpectedFindings, 9, false, 10);
+  }
 
   // OR RECORD
   addSectionHeader('OR RECORD');

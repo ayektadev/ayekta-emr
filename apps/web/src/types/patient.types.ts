@@ -224,6 +224,69 @@ export interface OperativeNote {
   caseDuration: string;
   circulatingRN: string;
   surgicalTechnologist: string;
+
+  /**
+   * Discrete op-note fields aligned with Migration Inventory `panel-opnote` / Product Spec procedure documentation.
+   * Free-text fields above remain for narrative; these support structured export and analytics hooks.
+   */
+  opNoteProcedureCategory: string;
+  opNoteProcedureOther: string;
+  opNoteProcedureDetails: string;
+  opNoteClosure: string;
+  opNoteDrains: string;
+  opNoteDrainsOther: string;
+  opNoteSpecimen: string;
+  opNoteSpecimenOther: string;
+  opNoteHerniaF: string;
+  opNoteHerniaH: string;
+  opNoteHerniaDetails: string;
+  /** Mirrors legacy `op_complications` select; narrative stays in `complications`. */
+  opNoteComplicationClass: '' | 'none' | 'bleeding' | 'infection' | 'nerve_injury' | 'other';
+  opNoteComplicationClassDetail: string;
+  opNoteEblMl: string;
+  opNoteOutcomeNarrative: string;
+  opNotePostOpMedia: boolean;
+}
+
+/** Repeatable complication events (Product Spec “complications log”; Blueprint `ComplicationEvent`). */
+export interface ComplicationLogEntry {
+  id: string;
+  recordedAt: string;
+  timing: '' | 'intraoperative' | 'immediate_postop' | 'delayed';
+  category: string;
+  severity: '' | 'minor' | 'moderate' | 'major' | 'critical';
+  description: string;
+  management: string;
+  recordedBy: string;
+}
+
+/** Structured surgical outcomes for registry/analytics (Blueprint Phase 5 “outcomes”). */
+export interface SurgicalOutcomesCapture {
+  immediateOutcome: '' | 'successful' | 'successful_with_modifications' | 'aborted' | 'converted';
+  outcomeNarrative: string;
+  dispositionFromOR: string;
+  unexpectedFindings: string;
+  /** null = unknown / not yet documented */
+  readmissionWithin30Days: boolean | null;
+  readmissionNotes: string;
+  returnToORWithin30Days: boolean | null;
+  mortalityRelated: boolean | null;
+}
+
+/** Pre-operative checklist (inventory `preop.*` + consent/NPO/site; Blueprint `PreOpChecklist`). */
+export interface PreOpChecklist {
+  asaClass: string;
+  allergiesReviewed: boolean;
+  consentObtained: '' | 'yes' | 'no' | 'pending';
+  npoConfirmed: boolean;
+  siteMarked: boolean;
+  imagingReviewed: boolean;
+  labsReviewed: boolean;
+  medsReconciled: boolean;
+  dvtProphylaxisPlan: string;
+  anticoagulationHeld: boolean | null;
+  betaBlockerContinued: boolean | null;
+  notes: string;
 }
 
 export interface Discharge {
@@ -614,6 +677,14 @@ export interface PACUFlow {
   urineClots: string;
   aldreteScore: string;
   rows: PACURow[];
+  /** Migration inventory PACU summary fields (pain + structured TAP). */
+  pacuPainScore: string;
+  pacuPainLocation: string;
+  pacuPainNotes: string;
+  tapBlockPerformed: boolean;
+  tapAnesthetic: string;
+  tapDose: string;
+  tapTime: string;
 }
 
 /**
@@ -795,6 +866,16 @@ export interface PatientData {
   progressNotes: ProgressNotesModule;
   /** Post-discharge follow-up appointment notes */
   followUpNotes: FollowUpNotesModule;
+
+  /** Phase 5 — discrete pre-op checklist (separate from narrative H&P). */
+  preOpChecklist: PreOpChecklist;
+  /** Phase 5 — complications log (repeatable). */
+  complicationLog: ComplicationLogEntry[];
+  /** Phase 5 — outcomes capture for analytics/registry. */
+  surgicalOutcomes: SurgicalOutcomesCapture;
+
+  /** Chunk J — nursing section sign-offs and related workflow state (optional on legacy charts). */
+  clinicalWorkflow?: ClinicalWorkflowState;
 }
 
 export type TabName =
@@ -802,10 +883,13 @@ export type TabName =
   | 'triage'
   | 'surgical-needs'
   | 'consent'
+  | 'pre-op-checklist'
   | 'medications'
   | 'labs'
   | 'imaging'
   | 'operative-note'
+  | 'complications-log'
+  | 'surgical-outcomes'
   | 'discharge'
   | 'follow-up-notes'
   | 'pre-anesthesia'
@@ -815,6 +899,17 @@ export type TabName =
   | 'pacu'
   | 'floor-flow'
   | 'progress-notes';
+
+/** Per-section nursing attestation stored on chart JSON (chunk J). */
+export interface NursingSectionSignoffEntry {
+  signedAt: string;
+  signedByDisplayName: string;
+  signedByUsername: string;
+}
+
+export interface ClinicalWorkflowState {
+  sectionNursingSignOff: Partial<Record<TabName, NursingSectionSignoffEntry>>;
+}
 
 export interface AppState extends PatientData {
   // UI state
@@ -878,6 +973,15 @@ export interface AppState extends PatientData {
   addFollowUpNote: (note: FollowUpNote) => void;
   removeFollowUpNote: (id: string) => void;
   updateFollowUpNote: (id: string, updates: Partial<FollowUpNote>) => void;
+
+  updatePreOpChecklist: (data: Partial<PreOpChecklist>) => void;
+  addComplicationLogEntry: (entry: ComplicationLogEntry) => void;
+  removeComplicationLogEntry: (id: string) => void;
+  updateComplicationLogEntry: (id: string, updates: Partial<ComplicationLogEntry>) => void;
+  updateSurgicalOutcomes: (data: Partial<SurgicalOutcomesCapture>) => void;
+
+  /** Nursing sign-off for a chart module (persisted in clinicalWorkflow). */
+  signOffNursingSection: (moduleId: TabName) => void;
 
   // Data management
   savePatient: () => { jsonSuccess: boolean };

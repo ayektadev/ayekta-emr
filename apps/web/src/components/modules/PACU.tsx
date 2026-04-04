@@ -64,6 +64,88 @@ export default function PACU() {
                 placeholder="e.g., Yes/No or details"
               />
             </div>
+            <div className="md:col-span-2 border border-dashed border-ayekta-border rounded-md p-3 bg-gray-50/60 font-clinical">
+              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                Arrival pain &amp; TAP block
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Pain score (0–10)</label>
+                  <input
+                    type="text"
+                    value={pacu.pacuPainScore}
+                    onChange={(e) => handleFieldChange('pacuPainScore', e.target.value)}
+                    className="w-full px-2 py-1.5 text-sm border border-ayekta-border rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Pain location</label>
+                  <select
+                    value={pacu.pacuPainLocation}
+                    onChange={(e) => handleFieldChange('pacuPainLocation', e.target.value)}
+                    className="w-full px-2 py-1.5 text-sm border border-ayekta-border rounded-md"
+                  >
+                    <option value="">—</option>
+                    <option value="Surgical site">Surgical site</option>
+                    <option value="Generalized">Generalized</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="md:col-span-3">
+                  <label className="block text-xs text-gray-600 mb-1">Pain notes</label>
+                  <textarea
+                    value={pacu.pacuPainNotes}
+                    onChange={(e) => handleFieldChange('pacuPainNotes', e.target.value)}
+                    rows={2}
+                    className="w-full px-2 py-1.5 text-sm border border-ayekta-border rounded-md"
+                  />
+                </div>
+              </div>
+              <label className="flex items-center gap-2 mt-3 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={pacu.tapBlockPerformed}
+                  onChange={(e) => handleFieldChange('tapBlockPerformed', e.target.checked)}
+                />
+                TAP block performed
+              </label>
+              {pacu.tapBlockPerformed && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Local anesthetic</label>
+                    <select
+                      value={pacu.tapAnesthetic}
+                      onChange={(e) => handleFieldChange('tapAnesthetic', e.target.value)}
+                      className="w-full px-2 py-1.5 text-sm border border-ayekta-border rounded-md"
+                    >
+                      <option value="">—</option>
+                      <option value="Bupivacaine">Bupivacaine</option>
+                      <option value="Ropivacaine">Ropivacaine</option>
+                      <option value="Lidocaine">Lidocaine</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Dose</label>
+                    <input
+                      type="text"
+                      value={pacu.tapDose}
+                      onChange={(e) => handleFieldChange('tapDose', e.target.value)}
+                      className="w-full px-2 py-1.5 text-sm border border-ayekta-border rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Time given</label>
+                    <input
+                      type="time"
+                      value={pacu.tapTime}
+                      onChange={(e) => handleFieldChange('tapTime', e.target.value)}
+                      className="w-full px-2 py-1.5 text-sm border border-ayekta-border rounded-md"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium mb-1">Closure Type</label>
               <select

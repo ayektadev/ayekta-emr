@@ -1,5 +1,10 @@
 -- Ayekta v2 — Postgres draft (Phase 1 lock; aligns with Engineering Blueprint §8)
--- Not applied by the web app yet; reference for upcoming FastAPI service.
+-- Canonical reference for normalized clinical tables (patients, encounters, versions, …).
+--
+-- Operational note: the running API’s first applied migration lives at
+-- `apps/api/migrations/001_core_tenant_chart_ingest.sql` (tenant + chart JSON ingest + sync_events).
+-- Apply that file to Supabase/RDS/Cloud SQL first for sync; merge toward this draft in later migrations.
+-- Open point: `patients.ayekta_id` as UUID vs client ISHI string — resolve before enforcing this DDL verbatim.
 
 CREATE TABLE tenants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

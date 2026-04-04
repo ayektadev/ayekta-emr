@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { usePatientStore } from '../../store/patientStore';
 import { generateFullChartPDF } from '../../utils/fullChartPDF';
-import { addToSyncQueue } from '../../services/syncQueue';
+import { getPatientDataSnapshot } from '../../store/patientStore';
+import { notifyChartSavedForSync } from '../../services/chartSyncEnqueue';
 import { Link, useNavigate } from 'react-router-dom';
 
 function Header() {
@@ -42,33 +43,6 @@ function Header() {
       window.removeEventListener('ayekta-sync-complete', handleSyncComplete);
     };
   }, [saveStatus]);
-
-  // Get full patient data for PDF generation
-  const patientData = usePatientStore((state) => ({
-    ishiId: state.ishiId,
-    currentProvider: state.currentProvider,
-    currentTab: state.currentTab,
-    createdAt: state.createdAt,
-    updatedAt: state.updatedAt,
-    firstSavedAt: state.firstSavedAt,
-    demographics: state.demographics,
-    triage: state.triage,
-    surgicalNeeds: state.surgicalNeeds,
-    consent: state.consent,
-    medications: state.medications,
-    labs: state.labs,
-    imaging: state.imaging,
-    operativeNote: state.operativeNote,
-    preAnesthesia: state.preAnesthesia,
-    anesthesiaRecord: state.anesthesiaRecord,
-    orRecord: state.orRecord,
-    nursingOrders: state.nursingOrders,
-    pacu: state.pacu,
-    floorFlow: state.floorFlow,
-    progressNotes: state.progressNotes,
-    followUpNotes: state.followUpNotes,
-    discharge: state.discharge,
-  }));
 
   const patientName = demographics.firstName || demographics.lastName
     ? `${demographics.firstName} ${demographics.lastName}`.trim()
@@ -133,6 +107,9 @@ function Header() {
         progressNotes: freshPatientData.progressNotes,
         followUpNotes: freshPatientData.followUpNotes,
         discharge: freshPatientData.discharge,
+        preOpChecklist: freshPatientData.preOpChecklist,
+        complicationLog: freshPatientData.complicationLog,
+        surgicalOutcomes: freshPatientData.surgicalOutcomes,
       };
 
       console.log('Generating PDF with data updatedAt:', currentPatientData.updatedAt);
@@ -149,28 +126,19 @@ function Header() {
         return;
       }
 
-      const jsonContent = JSON.stringify(currentPatientData, null, 2);
-
-      if (pdfBlob) {
-        await addToSyncQueue(currentPatientData.ishiId, jsonContent, pdfBlob);
+      const snapshot = getPatientDataSnapshot(usePatientStore.getState());
+      if (snapshot) {
+        await notifyChartSavedForSync(snapshot, pdfBlob);
+        downloadPDFLocally(pdfBlob, `GH26${snapshot.ishiId}_Chart.pdf`);
       }
       setSaveStatus('saved');
+      window.dispatchEvent(new CustomEvent('ayekta-sync-complete'));
       setIsUploading(false);
     } catch (error) {
       console.error('Save failed:', error);
       setSaveStatus('error');
       setIsUploading(false);
       setTimeout(() => setSaveStatus('idle'), 3000);
-    }
-  };
-
-  const handleDownload = () => {
-    try {
-      // Generate and download PDF
-      const pdfBlob = generateFullChartPDF(patientData);
-      downloadPDFLocally(pdfBlob, `GH26${patientData.ishiId}_Chart.pdf`);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
     }
   };
 
@@ -202,9 +170,8 @@ function Header() {
           )}
         </div>
 
-      {/* Save and Download Buttons */}
+      {/* Save w/ PDF: IndexedDB + audit + sync queue (with PDF) + local PDF download */}
         <div className="flex gap-4">
-          {/* Settings Link */}
           <Link
             to="/settings"
             className="py-2 px-4 text-sm text-gray-700 font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
@@ -212,9 +179,10 @@ function Header() {
           >
             Settings
           </Link>
-          
+
           <button
             id="savePatientBtn"
+            type="button"
             onClick={handleSave}
             disabled={isUploading || saveStatus === 'saving'}
             className={`py-2 px-6 text-white font-bold border-2 border-black rounded-md transition-all ${
@@ -223,15 +191,13 @@ function Header() {
                 : 'bg-ayekta-orange hover:opacity-90'
             }`}
           >
-            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Error' : 'Save'}
-          </button>
-          <button
-            id="downloadPdfBtn"
-            onClick={handleDownload}
-            className="py-2 px-6 text-ayekta-orange font-bold border-2 border-black rounded-md hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: '#FAF7F0' }}
-          >
-            Download
+            {saveStatus === 'saving'
+              ? 'Saving…'
+              : saveStatus === 'saved'
+                ? 'Saved'
+                : saveStatus === 'error'
+                  ? 'Error'
+                  : 'Save w/ PDF'}
           </button>
         </div>
       </div>

@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { useModuleSettings } from '../../hooks/useModules';
+import { useModuleManagement } from '../../store/moduleManagementStore';
 import type { ModuleConfig } from '../../types/module.types';
 
 export default function ModuleConfiguration() {
@@ -31,23 +32,14 @@ export default function ModuleConfiguration() {
     optional: 'Optional',
   };
 
-  const categoryIcons: Record<string, string> = {
-    core: '⚙️',
-    preoperative: '📋',
-    intraoperative: '🔪',
-    postoperative: '🏥',
-    administrative: '📊',
-    optional: '🔌',
-  };
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-2">Module Configuration</h2>
-        <p className="text-ayekta-muted">
-          Customize which modules are enabled for this deployment. Core modules
-          cannot be disabled.
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">Chart documentation modules</h2>
+        <p className="text-sm text-ayekta-muted">
+          Turn chart sections on or off for this device. Sections required for a minimal chart stay on; turning
+          a section off hides it from the chart tabs but does not delete what you already entered.
         </p>
       </div>
 
@@ -88,8 +80,7 @@ export default function ModuleConfiguration() {
                 className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">{categoryIcons[category] || '📦'}</span>
-                  <span className="font-semibold">
+                  <span className="font-semibold text-sm">
                     {categoryLabels[category] || category}
                   </span>
                   <span className="text-sm text-gray-500">
@@ -132,14 +123,11 @@ export default function ModuleConfiguration() {
         })}
       </div>
 
-      {/* Help Text */}
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h3 className="font-semibold text-blue-900 mb-2">💡 Tips</h3>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Core modules cannot be disabled as they are essential for basic functionality</li>
-          <li>• Enabling a module will automatically enable its dependencies</li>
-          <li>• Star (⭐) your frequently used modules for quick access</li>
-          <li>• Disabled modules are hidden from navigation but data is preserved</li>
+      <div className="mt-6 p-4 border border-ayekta-border rounded-md bg-gray-50 text-xs text-gray-600">
+        <p className="font-medium text-gray-800 mb-2">Behavior</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li>When you turn on a section, any required sections turn on with it.</li>
+          <li>Use the star to pin sections you open often; they move to the top of this list only.</li>
         </ul>
       </div>
     </div>
@@ -164,6 +152,8 @@ function ModuleRow({
   getMissingDependencies,
 }: ModuleRowProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const enabledModules = useModuleManagement((s) => s.enabledModules);
+  const isOn = module.isCore || enabledModules[module.id] === true;
   const missingDeps = getMissingDependencies(module.id);
   const hasMissingDeps = missingDeps.length > 0;
 
@@ -244,14 +234,16 @@ function ModuleRow({
             disabled={module.isCore}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
               module.isCore
-                ? 'bg-green-500 cursor-not-allowed'
-                : 'cursor-pointer'
+                ? 'bg-gray-400 cursor-not-allowed'
+                : isOn
+                  ? 'bg-ayekta-orange'
+                  : 'bg-gray-300'
             }`}
           >
             <span className="sr-only">Toggle module</span>
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                'translate-x-1'
+                isOn ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>

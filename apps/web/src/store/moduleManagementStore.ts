@@ -20,6 +20,20 @@ import {
   getAllDependencies,
 } from '../utils/moduleRegistry';
 
+function mergeEnabledModulesFromPreferences(
+  saved: Record<string, boolean> | undefined
+): Record<string, boolean> {
+  const fresh = getDefaultState().enabledModules;
+  const merged: Record<string, boolean> = { ...fresh, ...(saved || {}) };
+  for (const id of Object.keys(MODULE_REGISTRY)) {
+    const cfg = MODULE_REGISTRY[id]?.config;
+    if (cfg && merged[id] === undefined) {
+      merged[id] = cfg.enabledByDefault;
+    }
+  }
+  return merged;
+}
+
 // ============================================================================
 // STORE TYPES
 // ============================================================================
@@ -304,9 +318,16 @@ export const useModuleManagement = create<ModuleManagementState>((set, get) => (
       const activeMissionId = activeMissionRow?.v as string | undefined;
       
       if (preferences) {
+        const baseOrder =
+          preferences.moduleOrder && preferences.moduleOrder.length > 0
+            ? preferences.moduleOrder
+            : getDefaultState().moduleOrder;
+        const allIds = Object.keys(MODULE_REGISTRY);
+        const moduleOrder = [...baseOrder, ...allIds.filter((id) => !baseOrder.includes(id))];
+
         set({
-          enabledModules: preferences.enabledModules,
-          moduleOrder: preferences.moduleOrder || get().moduleOrder,
+          enabledModules: mergeEnabledModulesFromPreferences(preferences.enabledModules),
+          moduleOrder,
           favorites: preferences.favorites || [],
         });
       }

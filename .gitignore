@@ -26,3 +26,8 @@ dist-ssr
 # PWA
 dev-dist
 .claude/settings.local.json
+
+# Python API
+apps/api/.venv
+**/__pycache__
+*.egg-info

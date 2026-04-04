@@ -4,8 +4,10 @@
 
 This document outlines the bidirectional FHIR conversion system for Ayekta EMR. The system allows:
 1. **Export**: Convert internal PatientData format → FHIR Bundle (R4)
-2. **Import**: Convert FHIR Bundle → internal PatientData format
+2. **Import**: Convert FHIR Bundle → internal PatientData format (Patient stub + **best-effort clinical merge** from Observations, Conditions, etc.)
 3. **Backwards Compatibility**: Detect and load both FHIR and legacy JSON formats
+
+**Implementation status (v2 chunk E):** `fhirExport.ts` emits LOINC-coded vital Observations, `Condition` (pre/post-op diagnoses), `AllergyIntolerance`, `MedicationStatement` (home / PRN / preop lists), `Procedure`, lab `Observation` + `DiagnosticReport` with `result`, imaging `DiagnosticReport`, op-note and optional chart PDF `DocumentReference`. `fhirImport.ts` merges those resources into empty module fields after Patient extraction. Full US Core / `MedicationRequest` ordering and `fhirValidation.ts` are not implemented yet.
 
 ## FHIR Resources Used
 

@@ -40,3 +40,20 @@ export async function listPendingAttachmentsForPatient(
     return [];
   }
 }
+
+export async function listAllPendingAttachments(): Promise<LocalPendingAttachmentRow[]> {
+  try {
+    return await getAyektaDB().pendingAttachments.toArray();
+  } catch (e) {
+    console.error('listAllPendingAttachments:', e);
+    return [];
+  }
+}
+
+export async function deletePendingAttachmentById(id: number): Promise<void> {
+  try {
+    await getAyektaDB().pendingAttachments.delete(id);
+  } catch (e) {
+    console.error('deletePendingAttachmentById:', e);
+  }
+}

@@ -37,6 +37,25 @@ Ayekta EMR is a modular, offline-first electronic medical records system custom-
 ### Prerequisites
 
 - Node.js 18+ and npm
+- Optional: Python 3.9+ for the FastAPI sync service (`apps/api`)
+
+### Spec traceability (v2 rebuild)
+
+Product Spec, Engineering Blueprint, and Migration Inventory are tracked against the repo in **`docs/v2/spec-to-product-matrix.md`** so requirements are not silently dropped. Phase validation lives under **`docs/v2/phase-*-validation.md`**.
+
+### GitHub Pages + offline PWA
+
+The default build targets **`/ayekta-emr/`** (GitHub Pages). The app is **offline-first** (IndexedDB + service worker + `offline.html` navigation fallback) and **reuses a stored session** after first sign-in. Do not change `base` / router basename without reading **`docs/v2/github-pages-offline-pwa.md`**.
+
+### Postgres sync API (optional)
+
+```bash
+cd apps/api && python -m venv .venv && source .venv/bin/activate && pip install -e .
+# Set DATABASE_URL in apps/api/.env (see apps/api/.env.example), run migrations SQL, then:
+npm run api:dev   # from repo root, or: uvicorn ayekta_api.main:app --reload --port 8000
+```
+
+Point the web app at the API with `VITE_SYNC_API_BASE` and `VITE_SYNC_TENANT_ID` (see `apps/web/.env.example`).
 
 ### Installation
 

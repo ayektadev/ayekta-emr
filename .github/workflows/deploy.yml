@@ -25,7 +25,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Path B: set repo secrets VITE_SYNC_API_BASE (e.g. https://your-api.onrender.com) and
+      # optional VITE_SYNC_TENANT_SLUG (default: default). If unset, build runs offline-only demo mode.
       - name: Build
+        env:
+          VITE_SYNC_API_BASE: ${{ secrets.VITE_SYNC_API_BASE }}
+          VITE_SYNC_TENANT_SLUG: ${{ secrets.VITE_SYNC_TENANT_SLUG || 'default' }}
         run: npm run build
 
       - name: Deploy to gh-pages

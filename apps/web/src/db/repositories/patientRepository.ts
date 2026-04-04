@@ -37,6 +37,15 @@ export async function upsertPatientFromChart(
   }
 }
 
+export async function getPatientById(patientId: string): Promise<LocalPatientRow | undefined> {
+  try {
+    return await getAyektaDB().patients.get(patientId);
+  } catch (e) {
+    console.error('getPatientById:', e);
+    return undefined;
+  }
+}
+
 export async function listPatientsForFacility(ctx: PersistenceContext): Promise<LocalPatientRow[]> {
   const db = getAyektaDB();
   try {

@@ -78,3 +78,51 @@ body {
   animation-delay: 0.9s;
   opacity: 0;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-scale,
+  .animate-fade-in,
+  .animate-delay-300,
+  .animate-delay-500,
+  .animate-delay-700,
+  .animate-delay-900 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Chart density (Settings → Sync & display) */
+[data-chart-density='compact'] .chart-workspace .text-base {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+[data-chart-density='compact'] .chart-workspace .text-sm {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+[data-chart-density='compact'] .chart-prose {
+  --chart-prose-max: 42rem;
+}
+
+.chart-prose .max-w-5xl,
+.chart-prose .max-w-6xl,
+.chart-prose .max-w-7xl {
+  max-width: min(100%, var(--chart-prose-max, 80rem));
+}
+
+[data-chart-density='compact'] .chart-prose .max-w-5xl,
+[data-chart-density='compact'] .chart-prose .max-w-6xl,
+[data-chart-density='compact'] .chart-prose .max-w-7xl {
+  max-width: min(100%, var(--chart-prose-max, 42rem));
+}
+
+/* Visible keyboard focus for custom controls (WCAG 2.4.7) */
+.font-clinical button:focus-visible,
+.font-clinical a:focus-visible,
+.font-clinical [role='button']:focus-visible {
+  outline: 2px solid var(--accent, #c2410c);
+  outline-offset: 2px;
+}

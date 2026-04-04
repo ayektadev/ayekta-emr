@@ -2,7 +2,13 @@ import { useRef, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { usePatientStore } from '../store/patientStore';
-import { importPatientFromJSON } from '../utils/storage';
+import { parseLegacyPatientJson } from '../migration/legacyJson';
+import {
+  extractPatientStubFromBundle,
+  isFhirBundleJson,
+  mergeClinicalResourcesFromFhirBundle,
+  patientDataFromEmptyAppStateWithFhirStub,
+} from '../services/fhir/fhirImport';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -15,12 +21,13 @@ export default function DashboardPage() {
   const onNewPatient = () => {
     if (!user) return;
     startNew(user.displayName);
-    navigate('/chart');
+    const id = usePatientStore.getState().ishiId;
+    if (id) navigate(`/patients/${id}`);
   };
 
   const onContinue = () => {
     if (!ishiId) return;
-    navigate('/chart');
+    navigate(`/patients/${ishiId}`);
   };
 
   const onPickFile = () => fileRef.current?.click();
@@ -29,11 +36,33 @@ export default function DashboardPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const data = await importPatientFromJSON(file);
-      loadPatient(data);
-      navigate('/chart');
+      const text = await file.text();
+      const raw: unknown = JSON.parse(text);
+
+      if (isFhirBundleJson(raw)) {
+        const stub = extractPatientStubFromBundle(raw);
+        if (!stub) {
+          alert('This FHIR bundle has no Patient entry we can import.');
+          e.target.value = '';
+          return;
+        }
+        usePatientStore.getState().reset();
+        const base = patientDataFromEmptyAppStateWithFhirStub(usePatientStore.getState(), stub);
+        loadPatient(mergeClinicalResourcesFromFhirBundle(raw, base));
+      } else {
+        const result = parseLegacyPatientJson(raw);
+        if (!result.ok) {
+          alert(result.error || 'Invalid patient file.');
+          e.target.value = '';
+          return;
+        }
+        loadPatient(result.data);
+      }
+
+      const id = usePatientStore.getState().ishiId;
+      if (id) navigate(`/patients/${id}`);
     } catch {
-      alert('Invalid patient file. Please upload a valid Ayekta JSON export.');
+      alert('Invalid file. Use an Ayekta chart JSON export or a FHIR R4 Bundle with a Patient entry.');
     }
     e.target.value = '';
   };
@@ -42,8 +71,9 @@ export default function DashboardPage() {
     <div className="p-8 max-w-2xl font-clinical">
       <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
       <p className="text-gray-600 mb-8">
-        Signed in as <strong>{user?.displayName}</strong>. Chart data is stored locally in IndexedDB
-        (Dexie); cloud sync is not enabled in this build.
+        Signed in as <strong>{user?.displayName}</strong>. Charts save on this device as you work—you can
+        document care without an internet connection. Use <strong>Save w/ PDF</strong> on the chart for a PDF
+        download and sync queue update.
       </p>
       <div className="flex flex-col gap-3">
         <button
@@ -58,7 +88,7 @@ export default function DashboardPage() {
           onClick={onPickFile}
           className="py-3 px-4 rounded-md border-2 border-gray-400 font-medium hover:bg-gray-100 text-left"
         >
-          Import JSON…
+          Import chart JSON or FHIR bundle…
         </button>
         <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={onFile} />
         <button

@@ -9,7 +9,7 @@ export async function signOutAndResetChart(): Promise<void> {
   } catch (e) {
     console.error('signOutAndResetChart:', e);
   } finally {
-    useAuthStore.setState({ user: null });
+    useAuthStore.setState({ user: null, accessToken: null });
     usePatientStore.getState().reset();
   }
 }

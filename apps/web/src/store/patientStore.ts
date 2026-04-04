@@ -23,9 +23,15 @@ import {
   PACUFlow,
   FloorFlow,
   ProgressNotesModule,
+  ComplicationLogEntry,
+  PreOpChecklist,
+  SurgicalOutcomesCapture,
 } from '../types/patient.types';
 import { generateIshiId, getCurrentDate, getCurrentTime } from '../utils/calculations';
 import { saveToStorage } from '../utils/storage';
+import { appendLocalAuditEvent } from '../db/repositories/auditRepository';
+import { getPersistenceContext } from '../db/repositories/persistenceContext';
+import { useAuthStore } from './authStore';
 
 // Initial empty state for all modules
 const initialDemographics: Demographics = {
@@ -164,6 +170,23 @@ const initialOperativeNote: OperativeNote = {
   caseDuration: '',
   circulatingRN: '',
   surgicalTechnologist: '',
+
+  opNoteProcedureCategory: '',
+  opNoteProcedureOther: '',
+  opNoteProcedureDetails: '',
+  opNoteClosure: '',
+  opNoteDrains: '',
+  opNoteDrainsOther: '',
+  opNoteSpecimen: '',
+  opNoteSpecimenOther: '',
+  opNoteHerniaF: '',
+  opNoteHerniaH: '',
+  opNoteHerniaDetails: '',
+  opNoteComplicationClass: '',
+  opNoteComplicationClassDetail: '',
+  opNoteEblMl: '',
+  opNoteOutcomeNarrative: '',
+  opNotePostOpMedia: false,
 };
 
 const initialDischarge: Discharge = {
@@ -354,6 +377,13 @@ const initialPACU: PACUFlow = {
   urineClots: '',
   aldreteScore: '',
   rows: [],
+  pacuPainScore: '',
+  pacuPainLocation: '',
+  pacuPainNotes: '',
+  tapBlockPerformed: false,
+  tapAnesthetic: '',
+  tapDose: '',
+  tapTime: '',
 };
 
 const initialFloorFlow: FloorFlow = {
@@ -386,6 +416,70 @@ const initialProgressNotes: ProgressNotesModule = {
 const initialFollowUpNotes: FollowUpNotesModule = {
   notes: [],
 };
+
+const initialPreOpChecklist: PreOpChecklist = {
+  asaClass: '',
+  allergiesReviewed: false,
+  consentObtained: '',
+  npoConfirmed: false,
+  siteMarked: false,
+  imagingReviewed: false,
+  labsReviewed: false,
+  medsReconciled: false,
+  dvtProphylaxisPlan: '',
+  anticoagulationHeld: null,
+  betaBlockerContinued: null,
+  notes: '',
+};
+
+const initialSurgicalOutcomes: SurgicalOutcomesCapture = {
+  immediateOutcome: '',
+  outcomeNarrative: '',
+  dispositionFromOR: '',
+  unexpectedFindings: '',
+  readmissionWithin30Days: null,
+  readmissionNotes: '',
+  returnToORWithin30Days: null,
+  mortalityRelated: null,
+};
+
+function buildPatientDataForPersistence(state: AppState, firstSavedAt: string): PatientData | null {
+  if (!state.ishiId) return null;
+  return {
+    ishiId: state.ishiId,
+    currentProvider: state.currentProvider,
+    createdAt: state.createdAt,
+    updatedAt: new Date().toISOString(),
+    firstSavedAt,
+    demographics: state.demographics,
+    triage: state.triage,
+    surgicalNeeds: state.surgicalNeeds,
+    consent: state.consent,
+    medications: state.medications,
+    labs: state.labs,
+    imaging: state.imaging,
+    operativeNote: state.operativeNote,
+    discharge: state.discharge,
+    preAnesthesia: state.preAnesthesia,
+    anesthesiaRecord: state.anesthesiaRecord,
+    orRecord: state.orRecord,
+    nursingOrders: state.nursingOrders,
+    pacu: state.pacu,
+    floorFlow: state.floorFlow,
+    progressNotes: state.progressNotes,
+    followUpNotes: state.followUpNotes,
+    preOpChecklist: state.preOpChecklist,
+    complicationLog: state.complicationLog,
+    surgicalOutcomes: state.surgicalOutcomes,
+    clinicalWorkflow: state.clinicalWorkflow ?? { sectionNursingSignOff: {} },
+  };
+}
+
+/** Full chart JSON for persistence / sync (reads current store). */
+export function getPatientDataSnapshot(state: AppState): PatientData | null {
+  const firstSavedAt = state.firstSavedAt || new Date().toISOString();
+  return buildPatientDataForPersistence(state, firstSavedAt);
+}
 
 export const usePatientStore = create<AppState>((set, get) => ({
   // Metadata
@@ -422,6 +516,10 @@ export const usePatientStore = create<AppState>((set, get) => ({
   floorFlow: initialFloorFlow,
   progressNotes: initialProgressNotes,
   followUpNotes: initialFollowUpNotes,
+  preOpChecklist: initialPreOpChecklist,
+  complicationLog: [],
+  surgicalOutcomes: initialSurgicalOutcomes,
+  clinicalWorkflow: { sectionNursingSignOff: {} },
 
   // UI Actions
   setCurrentTab: (tab: TabName) => set({ currentTab: tab }),
@@ -766,48 +864,102 @@ export const usePatientStore = create<AppState>((set, get) => ({
       updatedAt: new Date().toISOString(),
     })),
 
+  updatePreOpChecklist: (data: Partial<PreOpChecklist>) =>
+    set((state) => ({
+      preOpChecklist: { ...state.preOpChecklist, ...data },
+      updatedAt: new Date().toISOString(),
+    })),
+
+  addComplicationLogEntry: (entry: ComplicationLogEntry) =>
+    set((state) => ({
+      complicationLog: [...state.complicationLog, entry],
+      updatedAt: new Date().toISOString(),
+    })),
+
+  removeComplicationLogEntry: (id: string) =>
+    set((state) => ({
+      complicationLog: state.complicationLog.filter((e) => e.id !== id),
+      updatedAt: new Date().toISOString(),
+    })),
+
+  updateComplicationLogEntry: (id: string, updates: Partial<ComplicationLogEntry>) =>
+    set((state) => ({
+      complicationLog: state.complicationLog.map((e) =>
+        e.id === id ? { ...e, ...updates } : e
+      ),
+      updatedAt: new Date().toISOString(),
+    })),
+
+  updateSurgicalOutcomes: (data: Partial<SurgicalOutcomesCapture>) =>
+    set((state) => ({
+      surgicalOutcomes: { ...state.surgicalOutcomes, ...data },
+      updatedAt: new Date().toISOString(),
+    })),
+
+  signOffNursingSection: (moduleId: TabName) => {
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+    const now = new Date().toISOString();
+    set((state) => ({
+      clinicalWorkflow: {
+        sectionNursingSignOff: {
+          ...(state.clinicalWorkflow?.sectionNursingSignOff ?? {}),
+          [moduleId]: {
+            signedAt: now,
+            signedByDisplayName: user.displayName,
+            signedByUsername: user.username,
+          },
+        },
+      },
+      updatedAt: now,
+    }));
+  },
+
   // Data management
   savePatient: () => {
     const state = get();
 
-    // Set firstSavedAt on first save only
     const firstSavedAt = state.firstSavedAt || new Date().toISOString();
     if (!state.firstSavedAt) {
       set({ firstSavedAt });
     }
 
-    const patientData: PatientData = {
-      ishiId: state.ishiId,
-      currentProvider: state.currentProvider,
-      createdAt: state.createdAt,
-      updatedAt: new Date().toISOString(),
-      firstSavedAt,
-      demographics: state.demographics,
-      triage: state.triage,
-      surgicalNeeds: state.surgicalNeeds,
-      consent: state.consent,
-      medications: state.medications,
-      labs: state.labs,
-      imaging: state.imaging,
-      operativeNote: state.operativeNote,
-      discharge: state.discharge,
-      preAnesthesia: state.preAnesthesia,
-      anesthesiaRecord: state.anesthesiaRecord,
-      orRecord: state.orRecord,
-      nursingOrders: state.nursingOrders,
-      pacu: state.pacu,
-      floorFlow: state.floorFlow,
-      progressNotes: state.progressNotes,
-      followUpNotes: state.followUpNotes,
-    };
+    const patientData = buildPatientDataForPersistence({ ...state, firstSavedAt }, firstSavedAt);
+    if (!patientData) {
+      return { jsonSuccess: false };
+    }
 
-    // Save to IndexedDB only (no local download)
-    saveToStorage(patientData); // This is async but we don't wait
+    void (async () => {
+      try {
+        await saveToStorage(patientData);
+        const ctx = getPersistenceContext();
+        await appendLocalAuditEvent({
+          tenantId: ctx.tenantId,
+          facilityId: ctx.facilityId,
+          username: ctx.username,
+          entityType: 'patient_chart',
+          entityId: state.ishiId,
+          action: 'save',
+          occurredAt: Date.now(),
+        });
+      } catch {
+        /* saveToStorage already logs */
+      }
+    })();
 
     return { jsonSuccess: true };
   },
 
   loadPatient: (data: PatientData) => {
+    const mergedOpNote = { ...initialOperativeNote, ...(data.operativeNote || {}) };
+    const mergedPacu = {
+      ...initialPACU,
+      ...(data.pacu || {}),
+      rows: data.pacu?.rows ?? initialPACU.rows,
+    };
+    const mergedPreOp = { ...initialPreOpChecklist, ...(data.preOpChecklist || {}) };
+    const mergedOutcomes = { ...initialSurgicalOutcomes, ...(data.surgicalOutcomes || {}) };
+
     set({
       ishiId: data.ishiId,
       currentProvider: data.currentProvider,
@@ -821,20 +973,32 @@ export const usePatientStore = create<AppState>((set, get) => ({
       medications: data.medications,
       labs: data.labs,
       imaging: data.imaging,
-      operativeNote: data.operativeNote,
+      operativeNote: mergedOpNote,
       discharge: data.discharge,
       preAnesthesia: data.preAnesthesia,
       anesthesiaRecord: data.anesthesiaRecord,
       orRecord: data.orRecord,
       nursingOrders: data.nursingOrders,
-      pacu: data.pacu,
+      pacu: mergedPacu,
       floorFlow: data.floorFlow,
       progressNotes: data.progressNotes,
       followUpNotes: data.followUpNotes || initialFollowUpNotes,
+      preOpChecklist: mergedPreOp,
+      complicationLog: Array.isArray(data.complicationLog) ? data.complicationLog : [],
+      surgicalOutcomes: mergedOutcomes,
+      clinicalWorkflow: data.clinicalWorkflow ?? { sectionNursingSignOff: {} },
     });
 
-    // Save to IndexedDB
-    saveToStorage(data);
+    // Save to IndexedDB — persist merged shape so new keys are not dropped
+    saveToStorage({
+      ...data,
+      operativeNote: mergedOpNote,
+      pacu: mergedPacu,
+      preOpChecklist: mergedPreOp,
+      complicationLog: Array.isArray(data.complicationLog) ? data.complicationLog : [],
+      surgicalOutcomes: mergedOutcomes,
+      clinicalWorkflow: data.clinicalWorkflow ?? { sectionNursingSignOff: {} },
+    });
   },
 
   reset: () => {
@@ -867,6 +1031,10 @@ export const usePatientStore = create<AppState>((set, get) => ({
       floorFlow: initialFloorFlow,
       progressNotes: initialProgressNotes,
       followUpNotes: initialFollowUpNotes,
+      preOpChecklist: initialPreOpChecklist,
+      complicationLog: [],
+      surgicalOutcomes: initialSurgicalOutcomes,
+      clinicalWorkflow: { sectionNursingSignOff: {} },
     });
   },
 }));

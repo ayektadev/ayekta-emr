@@ -13,7 +13,20 @@ export default {
         'ayekta-tab': '#f3f4f6',
       },
       fontFamily: {
+        sans: [
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
         clinical: [
+          'Inter',
+          'ui-sans-serif',
           'system-ui',
           '-apple-system',
           'Segoe UI',

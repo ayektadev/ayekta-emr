@@ -11,7 +11,7 @@ Source: Engineering Blueprint §13. Internal domain is canonical; FHIR is import
 | Encounter assessment / diagnoses | Condition | Problem list + encounter diagnoses |
 | MedicationOrder | MedicationRequest | Active orders vs documented home meds TBD |
 | ProcedureRecord | Procedure + DocumentReference | Narrative op note as DocumentReference |
-| LabResult | DiagnosticReport + Observation | |
+| LabResult | DiagnosticReport + Observation | Shipped in bundle export (`fhirExport.ts`); import merges via `mergeClinicalResourcesFromFhirBundle` |
 | ImagingOrder / reports | DiagnosticReport | Not a PACS archive |
 | Attachment | DocumentReference | Signed URLs from object storage |
 

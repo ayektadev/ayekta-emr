@@ -94,6 +94,21 @@ const MODULE_CONFIGS: Record<string, ModuleConfig> = {
     order: 4,
     isCore: false,
   },
+
+  'pre-op-checklist': {
+    id: 'pre-op-checklist',
+    name: 'Pre-op checklist',
+    description: 'ASA, consent status, NPO, site marking, and reconciliation items before anesthesia',
+    category: 'preoperative',
+    tabName: 'pre-op-checklist',
+    enabledByDefault: true,
+    allowedRoles: ['surgeon', 'nurse', 'anesthesiologist'],
+    requiresPatient: true,
+    dependencies: ['consent'],
+    icon: 'ClipboardList',
+    order: 4.5,
+    isCore: false,
+  },
   
   'pre-anesthesia': {
     id: 'pre-anesthesia',
@@ -216,6 +231,36 @@ const MODULE_CONFIGS: Record<string, ModuleConfig> = {
     order: 12,
     isCore: false,
   },
+
+  'complications-log': {
+    id: 'complications-log',
+    name: 'Complications log',
+    description: 'Repeatable complication events with timing, severity, and management',
+    category: 'intraoperative',
+    tabName: 'complications-log',
+    enabledByDefault: true,
+    allowedRoles: ['surgeon', 'nurse', 'anesthesiologist'],
+    requiresPatient: true,
+    dependencies: ['operative-note'],
+    icon: 'Activity',
+    order: 12.3,
+    isCore: false,
+  },
+
+  'surgical-outcomes': {
+    id: 'surgical-outcomes',
+    name: 'Surgical outcomes',
+    description: 'Structured outcomes and 30-day course fields for registry and analytics',
+    category: 'intraoperative',
+    tabName: 'surgical-outcomes',
+    enabledByDefault: true,
+    allowedRoles: ['surgeon', 'nurse'],
+    requiresPatient: true,
+    dependencies: ['operative-note'],
+    icon: 'HeartPulse',
+    order: 12.7,
+    isCore: false,
+  },
   
   // ============================================================================
   // POSTOPERATIVE MODULES
@@ -313,6 +358,9 @@ const MODULE_COMPONENTS: Record<string, React.LazyExoticComponent<React.Componen
   'labs': lazy(() => import('../components/modules/Labs')),
   'imaging': lazy(() => import('../components/modules/Imaging')),
   'operative-note': lazy(() => import('../components/modules/OperativeNote')),
+  'pre-op-checklist': lazy(() => import('../components/modules/PreOpChecklist')),
+  'complications-log': lazy(() => import('../components/modules/ComplicationsLog')),
+  'surgical-outcomes': lazy(() => import('../components/modules/SurgicalOutcomes')),
   'discharge': lazy(() => import('../components/modules/Discharge')),
   'pre-anesthesia': lazy(() => import('../components/modules/PreAnesthesia')),
   'anesthesia-record': lazy(() => import('../components/modules/AnesthesiaRecord')),

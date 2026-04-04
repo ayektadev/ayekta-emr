@@ -44,10 +44,16 @@ export interface LocalEncounterVersionRow {
   id: string;
   encounterId: string;
   versionNumber: number;
-  status: string;
+  status: 'draft' | 'in_review' | 'signed' | 'superseded';
   dataJson: Record<string, unknown>;
   createdAt: number;
   signedAt?: number;
+  signedByUsername?: string;
+  signedByDisplayName?: string;
+  /** Prior signed version this draft amends (addendum chain). */
+  supersedesVersionId?: string | null;
+  /** Optional reason or addendum note captured at sign (audit). */
+  amendmentReason?: string | null;
 }
 
 export interface LocalAttachmentMetaRow {
